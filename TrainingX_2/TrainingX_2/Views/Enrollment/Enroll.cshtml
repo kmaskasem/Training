@@ -1,0 +1,217 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using TrainingX_2.Areas.Identity.Data
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@{
+    ViewData["Title"] = "ลงทะเบียน";
+}
+@model TrainingX_2.Models.Training.Enrollment
+
+<div class="m-3 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+    <div class="mb-4 text-center">
+        <h3 class="">@ViewData["Title"]</h3>
+    </div>
+    <div>
+        <form asp-action="Enroll" method="post" enctype="multipart/form-data">
+            <div class="row g-2">
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="Name" class="form-label">ชื่อกิจกรรมอบรมที่สมัคร</label>
+
+                            <textarea rows="2" type="text" class="form-control" disabled>@ViewBag.TrainingName</textarea>
+                            <input asp-for="TrainingId" type="hidden" value="@ViewBag.TrainingId">
+                            <input name="Cost" type="hidden" value="@ViewBag.Cost">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="Name" class="form-label">โพสต์โดย</label>
+
+                            <input type="text" class="form-control" value="@ViewBag.TrainingOwner" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="solid">
+            @if (ViewBag.Cost > 0)
+            {
+                <div class="row my-2">
+                    <div class="col-md-2">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="form-label">ค่าสมัคร</label>
+                                <input type="number" value="@ViewBag.Cost" class="form-control" disabled />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="mySelect" class="form-label">ธนาคาร</label>
+                                <input value="@ViewBag.TrainingBank" class="form-control" disabled />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="Name" class="form-label">เลขที่บัญชีธนาคาร</label>
+                                <input value="@ViewBag.TrainingBankAccountNumber" class="form-control" disabled />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="Name" class="form-label">ชื่อ-นามสกุลเจ้าของบัญชีธนาคาร</label>
+                                <input value="@ViewBag.TrainingBankAccountHolder" class="form-control" disabled />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+
+            <div class="row my-2">
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="form-label">ชื่อ-นามสกุลผู้สมัคร</label>
+                            <input value="@((await UserManager.GetUserAsync(User)).FullName)" class="form-control" disabled />
+                            <input asp-for="ParticipantId" type="hidden" value="@((await UserManager.GetUserAsync(User)).Id)">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label asp-for="Phone" class="form-label">เบอร์ติดต่อ</label>
+                            <input asp-for="Phone" type="tel" value="@((await UserManager.GetUserAsync(User)).PhoneNumber)" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (ViewBag.Cost > 0)
+            {
+                <div class="row my-2">
+
+                    <div class="col-md-4">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label asp-for="PaymentImageFile" class="form-label">ภาพหลักฐานการชำระ</label>
+                                <div class="form-group">
+                                    <input asp-for="PaymentImageFile" type="file" accept="image/jpeg, image/png" id="image" onchange="previewFile(this)" class="form-control me-5" />
+                                    <span asp-validation-for="PaymentImageFile" class="text-danger"></span>
+                                </div>
+                                <div class="row p-2">
+                                    <div class="d-flex justify-content-center">
+                                        <img id="preview" src="~/uploads/photography.jpg" alt="Preview" style="display: flex; width: 300px;border-radius:10%; border-style: solid; border-color: darkgrey; border-width: 1px; " />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="form-label">วันที่ชำระเงิน</label>
+                                <div class="input-group">
+                                    <input name="Payment_date" type="datetime-local" class="form-control" id="datetimeInput" placeholder="กรุณาเลือกวันที่" />
+                                    @* <span class="input-group-text">
+                                        <i class="bi bi-calendar" style="width: 25px; height: 25px; position: relative; top: -3px;"></i>
+                                    </span> *@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="row my-2">
+                <div class="col-md-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">ยืนยัน</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--Show preview Pic-->
+<script type="text/javascript">
+    getProvince();
+    function previewFile(input) {
+        if (input.files && input.files[0]) {
+            //console.log(input.val());
+            console.log("000" + input.files[0]);
+            console.log(input.files);
+
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#preview').attr('src', e.target.result).width(300);
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+<!--End Show preview Pic-->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr%22%3E"></script>
+<!-- Start Date Thai-->
+<script>
+    // Custom function to convert Gregorian year to Thai Buddhist year
+    function toThaiYear(gregorianDate) {
+        var gregorianYear = gregorianDate.getFullYear();
+        var thaiYear = gregorianYear + 543;
+        return thaiYear;
+    }
+</script>
+
+<script>
+    // Function to initialize Flatpickr with Thai year formatting
+    function initFlatpickr() {
+        flatpickr("#dateInput", {
+            dateFormat: "d/m/Y",
+            placeholder: "กรุณาเลือกวันที่",
+            formatDate: function (date, formatStr) {
+                var thaiYear = toThaiYear(date);
+                formatStr = formatStr.replace("Y", thaiYear);
+                return flatpickr.formatDate(date, formatStr);
+            }
+        });
+    }
+
+    // Call the initialization function when the DOM is ready
+    document.addEventListener("DOMContentLoaded", function () {
+        initFlatpickr();
+    });
+</script>
+
+<script>
+    // Function to initialize Flatpickr with Thai year formatting for datetime input
+    function initFlatpickrForDatetimeInput() {
+        flatpickr("#datetimeInput", {
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: "d/m/Y H:i",
+            placeholder: "กรุณาเลือกวันที่และเวลา",
+            formatDate: function (date, formatStr) {
+                var thaiYear = toThaiYear(date);
+                formatStr = formatStr.replace("Y", thaiYear);
+                return flatpickr.formatDate(date, formatStr);
+            }
+        });
+    }
+
+    // Call the initialization function when the DOM is ready
+    document.addEventListener("DOMContentLoaded", function () {
+        initFlatpickrForDatetimeInput();
+    });
+</script>
+
+<!-- End Date Thai-->

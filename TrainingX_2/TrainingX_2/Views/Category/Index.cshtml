@@ -1,0 +1,318 @@
+﻿@model TrainingX_2.Controllers.PaginatedList<TrainingX_2.Models.Base.Category>
+
+@{
+    ViewData["Title"] = "ข้อมูลประเภทกิจกรรมอบรม";
+    int sequence = ((Model.PageIndex - 1) * Model.PageSize) + 1;
+}
+
+<div class="m-3 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+    <div class="mb-4">
+        <h2>@ViewData["Title"]</h2>
+    </div>
+
+    <div Id="PlaceHolderHere" />
+
+    <button class="nav-link text-light btn btn-primary m-1  btn-sm " type="button"
+            data-bs-toggle="ajax-modal" data-bs-target="#addCategoryModal">
+        เพิ่มข้อมูล
+    </button>
+
+    <table class="table text-center mt-4">
+        <thead>
+            <tr>
+                <th wIdth="15%">ลำดับ</th>
+                <th wIdth="40%">ชื่อประเภทกิจกรรมอบรม</th>
+                <th wIdth="20%">สถานะ</th>
+                <th class="text-center wIdth="20%"></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in @Model)
+            {
+                <tr>
+                    <td class="Sequence">
+                        <span Id="@item.Id">@(sequence++)</span>
+                    </td>
+                    <td class="Title text-start ">
+                        <span class="m-3" Id="data">@Html.DisplayFor(modelItem => item.Name)</span>
+                        <input type="text" class="form-control" value="@item.Name" style="display:none" />
+                        <div>
+                            <span class="text-danger m-1" Id="errrow"></span>
+                        </div>
+                    </td>
+                    <td class="Status" style=" text-align: center">
+                        @if (item.Status == TrainingX_2.Areas.Identity.Data.Status.ใช้งาน)
+                        {
+                            <button Id="sts" type="button" class="btn btn-success btn-sm rounded-pill px-3 opacity-75" value="0" onclick="ChangeStatus(this,'@item.Id')">@item.Status</button>
+                        }
+                        else
+                        {
+                            <button Id="sts" type="button" class="btn btn-danger btn-sm rounded-pill px-3 opacity-75" value="1" onclick="ChangeStatus(this,'@item.Id')">@item.Status</button>
+                        }
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-sm px-3 opacity-75" Id="Edit">แก้ไข</button>
+                        <button type="button" class="btn btn-primary btn-sm px-3 opacity-75" Id="Update" style="display:none">ยืนยัน</button>
+                        <button type="button" class="btn btn-secondary cancel-btn btn-sm px-3 opacity-75" Id="Cancel" style="display:none">ยกเลิก</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @{
+        var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+    }
+
+    <a asp-action="Index"
+       asp-route-pageNumber="@(Model.PageIndex - 1)"
+       class="btn btn-default @prevDisabled">
+        Previous
+    </a>
+    <a asp-action="Index"
+       asp-route-pageNumber="@(Model.PageIndex + 1)"
+       class="btn btn-default @nextDisabled">
+        Next
+    </a>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" Id="addCategoryModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hIdden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        @Html.Partial("_CategoryModalPartial")
+    </div>
+</div>
+
+
+@section scripts
+    {
+    <script type="text/javascript">
+
+        var add = "";
+        var errSpan = "";
+        var oldChk = "";
+
+        var cancelBtns = document.getElementsByClassName('cancel-btn');
+
+        //Edit Button
+        $("body").on("click", "#Edit", function () {
+            for (var i = 0; i < cancelBtns.length; i++)
+                cancelBtns[i].click();
+
+            var row = $(this).closest("tr");
+            $("td", row).each(function () {
+                if ($(this).find("input").length > 0) {
+                    var span = $(this).find("#data");
+                    var input = $(this).find("input");
+                    input.val(span.html());
+                    oldChk = $(this).find("input").val();
+                    input.show();
+                    span.hIde();
+
+                }
+            });
+
+            row.find("#Update").show();
+            row.find("#Cancel").show();
+            $(this).hIde();
+        });
+
+        //Update Button
+        $("body").on("click", "#Update", function () {
+            var row = $(this).closest("tr");
+
+            $("td", row).each(function () {
+                if ($(this).find("input").length > 0) {
+                    var span = $(this).find("#data");
+                    var input = $(this).find("input");
+
+                    errRow = $(this).find("div").find("#errrow");
+
+                    if (input.val() == "") {
+                        errRow.html("* โปรดกรอกข้อมูล");
+
+                    } else {
+                        //check if same with old input
+                        if (oldChk == input.val()) {
+
+                            for (var i = 0; i < cancelBtns.length; i++)
+                                cancelBtns[i].click();
+
+                        } else { //check if same with old in database
+
+                            $.ajax({
+                                type: "POST",
+                                url: "/Category/MacthCountByName",
+                                data: { key: input.val() },
+                                success: function (count) {
+
+                                    if (count >= 1) {
+
+                                        errRow.html("* ข้อมูลซ้ำ โปรดกรอกใหม่")
+
+                                    } else {
+
+                                        errRow.html("")
+                                        span.html(input.val());
+                                        span.show();
+                                        input.hIde();
+
+                                        console.log(parseInt(row.find(".Sequence").find("span").attr('Id')));
+                                        console.log(row.find(".Title").find("#data").html());
+                                        console.log(parseInt(row.find(".Status").find("button").val()));
+
+
+                                        var Updated = {
+                                            Id: parseInt(row.find(".Sequence").find("span").attr('Id')),
+                                            Name: row.find(".Title").find("#data").html(),
+                                            Status: parseInt(row.find(".Status").find("button").val())
+                                        };
+
+                                        $.ajax({
+                                            type: "POST",
+                                            url: "/Category/Edit",
+                                            data: { c: Updated },
+                                            success: function (data) {
+                                                if (data.response < 1) {
+                                                    console.log(data.currData);
+                                                    console.log("Update Data Failed " + data.response);
+                                                } else {
+                                                    console.log(data.currData);
+                                                    console.log("Update Data Success " + data.response);
+                                                }
+                                            },
+                                            error: function (errorMessage) {
+                                                // Error callback
+                                                console.log("Update Data Failed " + errorMessage);
+                                            },
+                                        });
+
+                                        row.find("#Edit").show();
+                                        row.find("#Cancel").hIde();
+                                        row.find("#Update").hIde();
+                                    }
+                                },
+                            });
+                        }
+                    }
+                }
+            });
+        });
+
+        //Cancel Edit Button [addEventListener]
+        for (var i = 0; i < cancelBtns.length; i++) {
+
+            cancelBtns[i].addEventListener('click', function () {
+                var row = $(this).closest("tr");
+                $("td", row).each(function () {
+                    if ($(this).find("input").length > 0) {
+                        var span = $(this).find("#data");
+                        var input = $(this).find("input");
+
+                        span.show();
+                        input.hIde();
+                        $(this).find("div").find("#errrow").html("");
+                    }
+                });
+                row.find("#Edit").show();
+                row.find("#Update").hIde();
+                $(this).hIde();
+            })
+
+        }
+
+        //Cancel Edit Button
+        $("body").on("click", "#Cancel", function () {
+            for (var i = 0; i < cancelBtns.length; i++)
+                cancelBtns[i].click();
+        });
+
+        //Status Button
+        function ChangeStatus(element, Id) {
+            var CurrStatus = null;
+            var CurrId = null;
+
+            CurrStatus = element;
+            CurrId = Id;
+            console.log(this);
+
+            $.ajax({
+                type: "POST",
+                url: "/Category/ChangeStatus",
+                data: { Id: CurrId },
+                success: function (response) {
+
+                    if (response.currAffect > 0) {
+
+                        if (response.currData.status == 1) {
+
+                            $(CurrStatus).removeClass("btn-success").addClass("btn-danger");
+                            CurrStatus.innerText = "ไม่ใช้งาน";
+                            CurrStatus.value = '@TrainingX_2.Areas.Identity.Data.Status.ไม่ใช้งาน'
+
+                        } else {
+
+                            $(CurrStatus).removeClass("btn-danger").addClass("btn-success");
+                            CurrStatus.innerText = "ใช้งาน";
+                            CurrStatus.value = '@TrainingX_2.Areas.Identity.Data.Status.ใช้งาน'
+                        }
+
+                    } else {
+                        console.log("Update Status Failed " + response);
+                    }
+                }
+            });
+
+        }
+
+        //Create Button (Show Modal)
+        $('button[data-bs-toggle="ajax-modal"]').click(function (event) {
+            for (var i = 0; i < cancelBtns.length; i++)
+                cancelBtns[i].click();
+            $('.modal').modal('show');
+        })
+
+        //Close Modal
+        $('[data-bs-dismiss="modal"]').click(function (event) {
+
+            add.val("");
+            errSpan.innerText = "";
+        })
+
+        //Save Button (ValIdate)
+        $('[data-save="modal"]').click(function (event) {
+
+            add = $('#formId').find('input');
+            errSpan = document.getElementById('errmsg');
+
+            if (add.val() == "") {
+
+                errSpan.innerText = '* โปรดกรอกข้อมูล';
+
+            } else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Category/MacthCountByName",
+                    data: { key: add.val() },
+                    success: function (count) {
+
+                        if (count >= 1) {
+
+                            errSpan.innerText = "* ข้อมูลซ้ำ โปรดกรอกใหม่";
+
+                        } else {
+                            $('#formId').submit();
+
+                        }
+
+                    },
+                });
+            }
+        })
+
+    </script>
+    }

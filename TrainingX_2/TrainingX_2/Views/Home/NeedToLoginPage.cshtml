@@ -1,0 +1,23 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "กรุณาเข้าสู่ระบบ";
+}
+<div class="m-3 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+    <div class="mb-4">
+        <h3 class="">คุณไม่มีสิทธิ์เข้าถึงหน้านี้ กรุณาเข้าสู่ระบบ</h3>
+        <button type="button" class="btn btn-primary px-3 mt-4"
+                onclick="goBack()">
+                ย้อนกลับ
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+}

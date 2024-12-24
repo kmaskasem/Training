@@ -1,0 +1,305 @@
+﻿@page
+@using TrainingX_2.Areas.Identity.Data
+@model RegisterModel
+@{
+    ViewData["Title"] = "สมัครสมาชิก";
+}
+<div class="container col-md-8 justify-content-center">
+    <div class="card shadow-2-strong card-registration" style="border-radius: 15px;">
+        <div class="card-body px-md-5 py-md-4">
+            <div class="row">
+                <div class="justify-content-center">
+                    <h2 class="text-center">@ViewData["Title"]</h2>
+                    <hr />
+                    <form id="registerForm" enctype="multipart/form-data" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row justify-content-center">
+
+                                    <div class="col-12">
+                                        <div class="row justify-content-center mb-1">
+
+                                            <img id="blah" src="~/uploads/Sample_User_Icon.jpg" style="width:253px; border-radius:10%;" alt="Preview" class="" />
+                                        </div>
+                                        <div class="row justify-content-center">
+
+                                            <div class="form-group">
+                                                <label asp-for="Input.ImageFile"></label>
+                                                <input asp-for="Input.ImageFile" accept="image/jpeg, image/png" onchange="readURL(this);" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="row">
+
+                                    <div class="form-group mb-3">
+
+                                        <label asp-for="Input.Name_title" class="control-label"></label>
+                                        <select asp-for="Input.Name_title" asp-items="@Html.GetEnumSelectList<NameTitle>()" class="form-control">
+                                            <option value="">--เลือกคำนำหน้าชื่อ--</option>
+                                        </select>
+                                        <span asp-validation-for="Input.Name_title" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Input.FirstName" class="control-label"></label><span class="text-danger"> *</span>
+                                        <input asp-for="Input.FirstName" class="form-control" aria-required="true" />
+                                        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Input.LastName" class="control-label"></label><span class="text-danger"> *</span>
+                                        <input asp-for="Input.LastName" class="form-control" aria-required="true" />
+                                        <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    @*
+                                    <div class="col-6">
+                                    <div class="form-floating mb-3">
+                                    <input asp-for="Input.Birthday" class="form-control" aria-required="true" />
+                                    <label asp-for="Input.Birthday"></label>
+                                    <span asp-validation-for="Input.Birthday" class="text-danger"></span>
+                                    </div>
+                                    </div>*@
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="Input.Phone" class="control-label"></label><span class="text-danger"> *</span>
+                                            <input asp-for="Input.Phone" class="form-control" aria-required="true" />
+                                            <span asp-validation-for="Input.Phone" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="row">
+                        <div class="form-group mb-3">
+                        <label asp-for="Input.Street"></label>
+                        <textarea class="form-control" asp-for="Input.Street" rows="2"></textarea>
+
+                        <input asp-for="Input.Street" class="form-control" />
+                        </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-3">
+                        <div class="form-group mb-3">
+                        <label asp-for="Input.Province"></label>
+                        <select asp-for="Input.Province" id="Province" class="form-control">
+                        <option value="">--เลือกจังหวัด--</option>
+                        </select>
+                        </div>
+                        </div>
+                        <div class="col-3">
+                        <div class="form-group mb-3">
+                        <label asp-for="Input.District"></label>
+                        <select asp-for="Input.District" id="District" class="form-control">
+                        <option value="">--เลือกอำเภอ--</option>
+                        </select>
+                        </div>
+                        </div>
+                        <div class="col-3">
+                        <div class="form-group mb-3">
+                        <label asp-for="Input.Subdistrict"></label>
+                        <select asp-for="Input.Subdistrict" id="Subdistrict" class="form-control">
+                        <option value="">--เลือกตำบล--</option>
+                        </select>
+                        </div>
+                        </div>
+                        <div class="col-3">
+                        <div class="form-group mb-3">
+                        <label asp-for="Input.Zipcode"></label>
+                        <input id="ZipcodeShow" class="form-control" disabled />
+                        <input asp-for="Input.Zipcode" type="hidden" id="Zipcode" class="form-control" />
+
+                        </div>
+                        </div>
+                        </div>
+                        <br />*@
+
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Input.Email" class="control-label">Email</label><span class="text-danger"> *</span>
+                                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Input.Password" class="control-label">Password</label><span class="text-danger"> *</span>
+                                    <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Input.ConfirmPassword" class="control-label">Confirm Password</label><span class="text-danger"> *</span>
+                                    <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-end">
+                            <div class="col-6 text-end">
+                                <label class="control-label text-primary ">เคยสมัครสมาชิกแล้ว ?</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">สมัครสมาชิก</button>
+                            </div>
+                            <div class="col-6">
+                                <a class="w-100 btn btn-lg btn-outline-primary" id="login" asp-area="Identity" asp-page="/Account/Login">เข้าสู่ระบบ</a>
+                            </div>
+                        </div>
+
+
+                    </form>
+                </div>
+                @*
+                <div class="col-md-6 col-md-offset-2">
+                <section>
+                <h3>Use another service to register.</h3>
+                <hr />
+                @{
+                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                <div>
+                <p>
+                There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkId=532715">article
+                about setting up this ASP.NET application to support logging in via external services</a>.
+                </p>
+                </div>
+                }
+                else
+                {
+                <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                <div>
+                <p>
+                @foreach (var Provider in Model.ExternalLogins!)
+                {
+                <button type="submit" class="btn btn-primary" name="Provider" value="@Provider.Name" title="Log in using your @Provider.DisplayName account">@Provider.DisplayName</button>
+                }
+                </p>
+                </div>
+                </form>
+                }
+                }
+                </section>
+                </div>
+                *@
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script type="text/javascript">
+
+
+        getProvince();
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                //console.log(input.val());
+                console.log("000" + input.files[0]);
+                console.log(input.files);
+
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#blah').attr('src', e.target.result).width(350);
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        //$('#fff').click(function () {
+        //    console.log("dfghjk");
+        //    //console.log($(this).val());
+        //    //console.log("000"+$(this).files[0]);
+        //    //console.log($(this).files);
+        //    //$('#GFG_DOWN').text("Id = " + t);
+        //});
+
+        //getDistrict
+        $('#Province').change(function () {
+            var prv = $(this).val();
+            $('#District').empty();
+            $('#District').append('<option value="">--เลือกอำเภอ--</option>');
+            if (prv != null) {
+                $.ajax({
+                    url: '/Cascade/District?name=' + prv,
+                    success: function (result) {
+                        //console.log(result);
+                        $.each(result, function (i, data) {
+                            $('#District').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                        });
+                    }
+                });
+            }
+        });
+
+        //getSubdistrict
+        $('#District').change(function () {
+            var dst = $(this).val();
+            $('#Subdistrict').empty();
+            $('#Subdistrict').append('<option value="">--เลือกตำบล--</option>');
+            if (dst != null) {
+                $.ajax({
+                    url: '/Cascade/Subdistrict?name=' + dst,
+                    success: function (result) {
+                        //console.log(result);
+                        $.each(result, function (i, data) {
+                            $('#Subdistrict').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                        });
+                    }
+                });
+            }
+        });
+
+        //getZipcode
+        $('#Subdistrict').change(function () {
+            var sdt = $(this).val();
+            $('#Zipcode').val("");
+            if (sdt != null) {
+                $.ajax({
+                    url: '/Cascade/Zipcode?name=' + sdt,
+                    success: function (result) {
+                        console.log(result);
+                        $('#ZipcodeShow').val(result.zipCode);
+                        $('#Zipcode').val(result.zipCode);
+                    }
+                });
+            }
+        });
+
+        function getProvince() {
+            $.ajax({
+                url: '/Cascade/Province',
+                success: function (result) {
+                    //console.log(result);
+                    $.each(result, function (i, data) {
+                        $('#Province').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                    });
+                }
+            });
+        }
+
+    </script>
+
+
+}

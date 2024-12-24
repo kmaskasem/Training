@@ -1,0 +1,315 @@
+﻿@using TrainingX_2.Models.Training;
+@model TrainingX_2.Controllers.PaginatedList<TrainingX_2.Models.Training.Enrollment>
+
+@{
+    ViewData["Title"] = "การลงทะเบียนของฉัน";
+    int sequence = ((Model.PageIndex - 1) * Model.PageSize) + 1;
+}
+<!-- Content -->
+<div class="m-0 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+    <div class="mb-4">
+        <h2>@ViewData["Title"]</h2>
+    </div>
+
+    <!-- Search Button -->
+    @*<div class="row my-3">
+    <div class="col-md-10">
+    <div class="col-md-8">
+    <button id="btn" type="button" class="btn btn-outline-primary justify-content-center">
+    <i class="bi bi-search"></i>
+    <span>ค้นหา</span>
+    </button>
+    </div>
+    </div>
+    </div>*@
+    <!-- End Search Button -->
+    <!-- รายละเอียดการค้นหา -->
+    <form asp-controller="Enrollment" asp-action="MyHistoryEnrollmentsList" method="get" id="searchForm" style="display: inline;">
+        <div class="row mx-0 mb-4 pb-4 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+            <div class="row m-0 g-3 justify-content-between">
+                <div class="col-md-4">
+                    <label for="mySelect">กิจกรรมอบรม</label>
+                    <select class="form-control" id="mySelect" name="searchTrainingName" asp-items="(IEnumerable<SelectListItem>)@ViewData["Trainings"]">
+                        <option value="">-- เลือกกิจกรรม --</option>
+                    </select>
+                </div>
+                <div class="col-md-4 pe-2">
+                    <label for="searchCategory">ประเภทของกิจกรรมอบรม</label>
+                    <select class="form-control" id="mySelect" name="searchTrainingCategory" asp-items="(IEnumerable<SelectListItem>)@ViewData["Categories"]">
+                        <option value="">-- เลือกประเภทกิจกรรม --</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" id="filter" class="btn btn-primary  btn-block">Filter</button>
+                </div>
+            </div>
+
+        </div>
+
+    </form>
+    <!-- ปิดรายละเอียดการค้นหา -->
+    <!-- Table -->
+    <div class="rounded mt-4" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+
+        <div class="table-responsive w-100 m-2 p-2">
+            <table class="table">
+                <thead>
+                    <tr style="text-align: center">
+                        <th width="10%">ลำดับ</th>
+                        <th width="55%">ชื่อกิจกรรม</th>
+                        <th width="17%">ประเภทกิจกรรม</th>
+                        <th width="18%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (@Model.Any())
+                    {
+                        @foreach (var item in @Model)
+                        {
+                            <tr>
+                                <td style="text-align: center">@(sequence++)</td>
+                                <td>
+                                    <div>
+                                        <p>@item.Training.Name</p>
+
+                                    </div>
+                                </td>
+                                <td style="text-align: center">
+                                    <div>
+                                        <p>@item.Training.Category.Name</p>
+                                    </div>
+                                </td>
+                                <td class="px-4">
+                                    <div class="d-flex justify-content-center">
+                                        @if (item.Check_status == Status_Enroll.ยกเลิกการลงทะเบียน)
+                                        {
+                                            <button id="testbtn" type="button" class="btn btn-secondary btn-sm px-2 opacity-75">
+                                                @item.Check_status
+                                            </button>
+                                        }
+                                        else if (item.Check_status == Status_Enroll.ตรวจสอบไม่ผ่าน)
+                                        {
+                                            <button type="button" class="btn btn-danger btn-sm px-2 opacity-75">@item.Check_status</button>
+                                        }
+                                        else if (item.Check_status == Status_Enroll.ตรวจสอบผ่าน)
+                                        {
+                                            <button type="button" class="btn btn-success btn-sm px-2 opacity-75">@item.Check_status</button>
+                                        }
+                                    </div>
+                                    @if (item.Note != null)
+                                    {
+                                        <div><span>หมายเหตุ : @item.Note</span></div>
+                                    }
+
+                                    <div class="mt-1 d-flex justify-content-center">
+                                        @using (Html.BeginForm("Detail", "Training", FormMethod.Get))
+                                        {
+                                            <input type="hidden" name="id" value="@item.Training.Id" />
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                ดูรายละเอียด
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="py-5" style="text-align: center">ไม่พบข้อมูล</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+
+        @{
+            var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+            var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+        }
+
+        <a asp-action="Index"
+           asp-route-pageNumber="@(Model.PageIndex - 1)"
+           class="btn btn-default @prevDisabled">
+            Previous
+        </a>
+        <a asp-action="Index"
+           asp-route-pageNumber="@(Model.PageIndex + 1)"
+           class="btn btn-default @nextDisabled">
+            Next
+        </a>
+    </div>
+    <!-- End Table -->
+
+
+</div>
+
+
+
+
+<!-- End Content-->
+<!-- Modal to display selected image -->
+<div class="modal fade" id="participantModal" tabindex="-1" aria-labelledby="participantModalLabel" aria-hidden="true">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="participantModalLabel">ภาพหลักฐานการชำระ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p id="participantFullName"></p>
+                <p id="payDateTime"></p>
+                <img id="participantImage" style="width: 300px;">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Modal to display selected image -->
+<!-- checkboxModal -->
+<div class="modal fade" id="checkboxModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <!--  -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ตรวจสอบ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Check" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="eid" />
+                    <div class="row pe-0 my-3 justify-content-center">
+                        <div class="col-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="Check_status" value="@Status_Enroll.ตรวจสอบผ่าน" id="flexRadioDefault1" checked>
+                                <label class="form-check-label" for="flexRadioDefault1">
+                                    ตรวจสอบผ่าน
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="Check_status" value="@Status_Enroll.ตรวจสอบไม่ผ่าน" id="flexRadioDefault2">
+                                <label class="form-check-label" for="flexRadioDefault2">
+                                    ตรวจสอบไม่ผ่าน
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-4 pe-0 justify-content-center">
+                        <div class="col-10 text-start">
+                            <label class="">หมายเหตุ</label>
+                            <textarea type="text" class="form-control" name="Note" for="mySelect" id="Note" rows="1"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">ยืนยัน</button>
+                </div>
+            </form>
+        </div>
+        <!--  -->
+    </div>
+</div>
+<!-- End checkboxModal -->
+@section scripts
+    {
+
+    <script type="text/javascript">
+        console.log("Loaded");
+        var c = 0;
+        function Examine(element) {
+            c = c + 1;
+            console.log(c);
+            console.log(element.value);
+            //var eid = element.value;
+            $("#eid").val(element.value);
+            $("#checkboxModal").modal("show");
+        }
+        //function Test2() {
+        //    c = c + 1;
+        //    console.log(c);
+        //    $("#modal2").modal("show");
+        //}
+        //$(document).ready(function () {
+        //    $(".open-model1-btn").on("click", function () {
+        //        console.log("Clicked");
+        //        $("#checkboxModal").modal("show");
+        //        //var fullName = $(this).data("fullname");
+        //        //var imageSrc = $(this).data("image");
+        //        //var payTime = $(this).data("paytime");
+
+        //        //$("#participantFullName").text(fullName);
+        //        //$("#participantImage").attr("src", imageSrc);
+        //        //$("#payDateTime").text(payTime);
+        //        //$("#participantModal").modal("show");
+        //    });
+        //});
+
+        $(document).ready(function () {
+            $(".open-model2-btn").on("click", function () {
+                var fullName = $(this).data("fullname");
+                var imageSrc = $(this).data("image");
+                var payTime = $(this).data("paytime");
+
+                $("#participantFullName").text(fullName);
+                $("#participantImage").attr("src", imageSrc);
+                $("#payDateTime").text(payTime);
+                $("#participantModal").modal("show");
+            });
+        });
+
+
+
+        //function getSelectedOptions() {
+        //    const selectedOptions = [];
+        //    $('input[type=checkbox]:checked').each(function () {
+        //        selectedOptions.push($(this).val());
+        //    });
+
+        //    $('#checkboxModal').modal('hide');
+        //    // Do something with the selected options (e.g., display them on the main page)
+        //    alert('Selected Options: ' + selectedOptions.join(', '));
+        //}
+
+        //const btn = document.getElementById('btn');
+        //const form = document.getElementById('searchForm');
+
+        //btn.addEventListener('click', () => {
+
+        //    if (form.style.display === 'none') {
+        //        // 👇️ this SHOWS the form
+        //        form.style.display = 'block';
+        //    } else {
+        //        // 👇️ this HIdES the form
+        //        form.style.display = 'none';
+        //    }
+        //});
+
+    </script>
+
+    <script>
+        // Function to initialize Flatpickr with Thai year formatting for datetime input
+        function initFlatpickrForDatetimeInput() {
+            flatpickr("#datetimeInput", {
+                enableTime: true,
+                time_24hr: true,
+                dateFormat: "d/m/Y H:i",
+                placeholder: "กรุณาเลือกวันที่และเวลา",
+                formatDate: function (date, formatStr) {
+                    var thaiYear = toThaiYear(date);
+                    formatStr = formatStr.replace("Y", thaiYear);
+                    return flatpickr.formatDate(date, formatStr);
+                }
+            });
+        }
+
+        // Call the initialization function when the DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+            initFlatpickrForDatetimeInput();
+        });
+    </script>
+    <!-- End Date Thai-->
+}

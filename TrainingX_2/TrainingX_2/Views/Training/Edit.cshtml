@@ -1,0 +1,505 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using TrainingX_2.Areas.Identity.Data
+
+@*@inject SignInManager<User> SignInManager*@
+@inject UserManager<User> UserManager
+
+@model TrainingX_2.Models.Training.Training
+
+@{
+    ViewData["Title"] = "แก้ไขกิจกรรมอบรม";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag/dist/css/multi-select-tag.css">
+@*<div class="modal fade" id="NewModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog modal-xl modal-dialog-scrollable">*@
+<div class="modal-content">
+    <div class="modal-header justify-content-center">
+        <h5 class="modal-title" id="exampleModalLabel">@ViewData["Title"]</h5>
+    </div>
+    <div class="modal-body">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label asp-for="Name" class="form-label">ชื่อกิจกรรมอบรม</label>
+                            <textarea asp-for="Name" type="text" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col-md-12">
+                            <label>
+                                ประเภทของการอบรม
+                            </label>
+                            <select class="form-control" id="mySelect" asp-for="CategId" asp-items="(IEnumerable<SelectListItem>)@ViewData["Categories"]">
+                                <option value="">-- เลือกประเภทกิจกรรม --</option>
+                            </select>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="@Model.ImageFile" class="form-label">ภาพโปรโมทกิจกรรมอบรม</label>
+                        <input type="hidden" id="pre_input" name="pre_input" value="@Model.Training_picture" />
+                        <input asp-for="@Model.ImageFile" accept="image/jpeg, image/png" 
+                        onchange="readURL(this);" class="form-control" />
+                        <span asp-validation-for="@Model.ImageFile" class="text-danger"></span>
+                    </div>
+                    <div class="row p-2">
+                        <div class="d-flex justify-content-center">
+                            @if (Model.Training_picture == null)
+                            {
+                                <img id="preview" src="@Url.Content("~/uploads/photography.jpg")" class="rounded" alt="Preview" style="display: flex; width: 300px;border-radius:10%; border-style: solid; border-color: darkgrey; border-width: 1px; " />
+                            }
+                            else
+                            {
+                                <img id="preview" src="@Url.Content("~/uploads/training/img/"+@Model.Training_picture)" class="rounded" alt="Preview" style="display: flex; width: 300px;border-radius:10%; border-style: solid; border-color: darkgrey; border-width: 1px; " />
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-12">
+                    <label asp-for="Description" class="form-label">รายละเอียดกิจกรรมอบรม</label>
+                    <textarea asp-for="Description" type="text" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-6">
+                    <label asp-for="Lecturer" class="form-label">ชื่อ-นามสกุลวิทยากร</label>
+                    <input asp-for="Lecturer" type="text" class="form-control" id="Name">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="ScheduleFile" class="form-label">ไฟล์เอกสารกำหนดการในการดำเนินกิจกรรม</label>
+                    <div class="row justify-content-between">
+                        <div class="col-md-10">
+                            <input type="hidden" id="pre_file" name="pre_file" value="@Model.Schedule_file" />
+                            <input asp-for="ScheduleFile" class="form-control"
+                                   accept="application/pdf" onchange="addFile(this);" id=" inputFile">
+                        </div>
+                        @if (Model.Schedule_file != null)
+                        {
+                            <div class="col-md-2" id="divFile">
+                                <a class="btn btn-warning bd-example-modal-lg-btn"
+                                   data-file="@("/uploads/training/file/" + Model.Schedule_file)">
+                                   ดูไฟล์</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-12">
+                    <label asp-for="Objectives" class="form-label">วัตถุประสงค์ของการอบรม</label>
+                    <textarea asp-for="Objectives" type="text" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-4">
+                    <label asp-for="Start_train_Date" class="form-label">วันที่เริ่ม</label>
+                    <div class="input-group">
+                        <input name="Start_train_Date" type="date" class="form-control" value="@Model.Start_train_Date.Value.ToString("yyyy-MM-dd"
+                                , System.Globalization.CultureInfo.InvariantCulture)" placeholder="กรุณาเลือกวันที่" />
+                        @* <span class="input-group-text">
+                        <i class="bi bi-calendar" style="width: 25px; height: 25px; position: relative; top: -3px;"></i>
+                        </span> *@
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="End_train_Date" class="form-label">วันที่สิ้นสุด</label>
+                    <div class="input-group">
+                        <input name="End_train_Date" type="date" class="form-control" value="@Model.End_train_Date.Value.ToString("yyyy-MM-dd"
+                                , System.Globalization.CultureInfo.InvariantCulture)" placeholder="กรุณาเลือกวันที่" />
+                        @* <span class="input-group-text">
+                        <i class="bi bi-calendar" style="width: 25px; height: 25px; position: relative; top: -3px;"></i>
+                        </span> *@
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Hours" class="form-label">ระยะเวลา (ชั่วโมง)</label>
+                    <input asp-for="Hours" type="number" class="form-control" id="Name" min="0">
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-4">
+                    <label for="Start_enroll_Date" class="form-label">วันที่เริ่มต้นการลงทะเบียน</label>
+                    <div class="input-group">
+
+                        <input type="datetime-local" name="Start_enroll_Date" required value="@Model.Start_enroll_Date.Value.ToString("yyyy-MM-dd hh:mm"
+                                , System.Globalization.CultureInfo.InvariantCulture)" class="form-control" placeholder="กรุณาเลือกวันที่" />
+                        @* <span class="input-group-text">
+                        <i class="bi bi-calendar" style="width: 25px; height: 25px; position: relative; top: -3px;"></i>
+                        </span> *@
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="End_enroll_Date" class="form-label">วันที่สิ้นสุดการลงทะเบียน</label>
+                    <div class="input-group">
+                        <input type="datetime-local" name="End_enroll_Date" required value="@Model.End_enroll_Date.Value.ToString("yyyy-MM-dd hh:mm"
+                                , System.Globalization.CultureInfo.InvariantCulture)" class="form-control" placeholder="กรุณาเลือกวันที่" />
+                        @* <span class="input-group-text">
+                        <i class="bi bi-calendar" style="width: 25px; height: 25px; position: relative; top: -3px;"></i>
+                        </span> *@
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="NumberOfParticipants" class="form-label">จำนวนผู้เข้าร่วม</label>
+                    <input asp-for="NumberOfParticipants" type="number" class="form-control" id="Name" min="0">
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-12">
+                    <label asp-for="Venue_street" class="form-label">สถานที่จัดกิจกรรมอบรม</label>
+                    <textarea asp-for="Venue_street" type="text" class="form-control" id="Name" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-3">
+                    <div class="form-group mb-3">
+                        <label asp-for="Venue_province">จังหวัด</label>
+                        <select asp-for="Venue_province" id="Province" asp-items="(IEnumerable<SelectListItem>)@ViewData["Provinces"]" class="form-control">
+                            <option value="">--เลือกจังหวัด--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group mb-3">
+                        <label asp-for="Venue_district">อำเภอ</label>
+                        <select asp-for="Venue_district" id="District" asp-items="(IEnumerable<SelectListItem>)@ViewData["Districts"]" class="form-control">
+                            <option value="">--เลือกอำเภอ--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group mb-3">
+                        <label asp-for="Venue_subdistrict">ตำบล</label>
+                        <select asp-for="Venue_subdistrict" id="Subdistrict" asp-items="(IEnumerable<SelectListItem>)@ViewData["Subdistricts"]" class="form-control">
+                            <option value="">--เลือกตำบล--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group mb-3">
+                        <label asp-for="Venue_zipcode">รหัสไปรษณีย์</label>
+                        <input id="ZipcodeShow" class="form-control" value="@Model.Venue_zipcode" disabled />
+                        <input asp-for="Venue_zipcode" type="hidden" id="Zipcode" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-3">
+                    <label asp-for="BankId">ธนาคาร</label>
+                    <select asp-for="BankId" class="form-control my-2" asp-items="(IEnumerable<SelectListItem>)@ViewData["Banks"]" id="mySelect">
+                        <option value="">-- เลือกธนาคาร --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Bank_account_number" class="form-label">เลขที่บัญชีธนาคาร</label>
+                    <input asp-for="Bank_account_number" type="text" class="form-control" id="Name">
+                </div>
+                @*</div>*@
+                @*<div class="row my-2">*@
+                <div class="col-md-4">
+                    <label asp-for="Bank_account_holder" class="form-label">ชื่อ-นามสกุลเจ้าของบัญชีธนาคาร</label>
+                    <input asp-for="Bank_account_holder" type="text" class="form-control" id="Name">
+                </div>
+                <div class="col-md-2">
+                    <label asp-for="Cost" class="form-label">ค่าใช้จ่าย</label>
+                    <input asp-for="Cost" type="number" class="form-control" id="Name" min="0">
+                </div>
+            </div>
+            <div class="row my-2 justify-content-between">
+                <div class="col-md-3">
+                    <label asp-for="OwnerId" class="form-label">เจ้าของกิจกรรม</label>
+                    <input disabled type="text" class="form-control" id="Name" value="@((await UserManager.GetUserAsync(User)).FullName)">
+                </div>
+                <div class="col-md-3 d-flex align-items-end flex-row-reverse">
+                    <input type="hidden" class="form-control" asp-for="Id">
+                    <button type="submit" class="btn ms-2 btn-primary">ตกลง</button>
+                    <button type="button" onclick="goBack()" class="btn ms-2 btn-outline-primary">ยกเลิก</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- modal --!>
+<div class="modal fade" id="bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"  style="height: 100vh;">
+        <div class="modal-content">
+            <div class="modal-header">
+            </div>
+            <div class="modal-body">
+                <iframe id="ShowFile" height="500" class="w-100"></iframe>
+             </div>
+             <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >Close</button>
+              </div>
+        </div>
+    </div>
+</div>
+<!-- modal --!>
+@section Scripts {
+            <partial name="_ValidationScriptsPartial" />
+            <!-- Add the flatpickr JavaScript file -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    @*    <script src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag/dist/js/multi-select-tag.js"></script>
+*@    <script type="text/javascript">
+    </script>
+    <script>
+
+        var pre_input = document.getElementById('pre_input');
+        var pre_file = document.getElementById('pre_file');
+
+        console.log("ddddd" + pre_file.value);
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function addFile(input) {
+            var divFile = document.getElementById('divFile');
+            if (input.files && input.files[0]) {
+            }
+            else {
+                pre_file.value = null;
+            }
+            divFile.style.display = 'none';
+        }
+
+        function readURL(input) {
+            var previewImage = document.getElementById('preview');
+
+            console.log("ddddd"+pre_input.value);
+            if (input.files && input.files[0]) {
+                console.log(input);
+                console.log(input.value);
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+            else {
+                previewImage.src = '@Url.Content("~/uploads/photography.jpg")';
+                pre_input.value = null;
+            }
+        }
+
+
+        // function editHandler(img) {
+        //     //pre_pic = img;
+        //     pre_input.value = img;
+        //     DetailSection.style.display = 'none';
+        //     EditUserForm.style.display = 'inline-flex';
+        // }
+
+
+        //getProvince();
+        // function previewFile(input) {
+        //     var previewImage = document.getElementById('preview');
+        //     if (input.files && input.files[0]) {
+        //         var reader = new FileReader();
+        //         reader.onload = function (e) {
+        //             previewImage.src = e.target.result;
+        //         };
+        //         reader.readAsDataURL(input.files[0]);
+        //     }
+        //     else {
+        //         previewImage.src = '@Url.Content("~/uploads/photography.jpg")';
+        //     }
+        // }
+
+        $(".bd-example-modal-lg-btn").on("click", function () {
+            var file = $(this).data("file");
+
+            $("#ShowFile").attr("src", file);
+            $("#bd-example-modal-lg").modal("show");
+        });
+
+        function cancelEdit(tid) {
+
+            // $.ajax({
+            //     url: '/Training/Detail/' + tid,
+            //     success: function (result) {
+            //         //console.log(result);
+            //     }
+            // });
+        }
+
+        //getDistrict
+        $('#Province').change(function () {
+            var prv = $(this).val();
+            $('#District').empty();
+            $('#District').append('<option value="">--เลือกอำเภอ--</option>');
+            $('#Subdistrict').empty();
+            $('#Subdistrict').append('<option value="">--เลือกตำบล--</option>');
+            $('#ZipcodeShow').val("");
+            $('#Zipcode').val("");
+            if (prv != null) {
+                $.ajax({
+                    url: '/Cascade/District?name=' + prv,
+                    success: function (result) {
+                        //console.log(result);
+                        $.each(result, function (i, data) {
+                            $('#District').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                        });
+                    }
+                });
+            }
+        });
+
+        //getSubdistrict
+        $('#District').change(function () {
+            var dst = $(this).val();
+            $('#Subdistrict').empty();
+            $('#Subdistrict').append('<option value="">--เลือกตำบล--</option>');
+            $('#ZipcodeShow').val("");
+            $('#Zipcode').val("");
+            if (dst != null) {
+                $.ajax({
+                    url: '/Cascade/Subdistrict?name=' + dst,
+                    success: function (result) {
+                        //console.log(result);
+                        $.each(result, function (i, data) {
+                            $('#Subdistrict').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                        });
+                    }
+                });
+            }
+        });
+
+        //getZipcode
+        $('#Subdistrict').change(function () {
+            var sdt = $(this).val();
+            $('#ZipcodeShow').val("");
+            $('#Zipcode').val("");
+            if (sdt != null) {
+                $.ajax({
+                    url: '/Cascade/Zipcode?name=' + sdt,
+                    success: function (result) {
+                        console.log(result);
+                        $('#ZipcodeShow').val(result.zipCode);
+                        $('#Zipcode').val(result.zipCode);
+                    }
+                });
+            }
+        });
+
+        function getProvince() {
+            $.ajax({
+                url: '/Cascade/Province',
+                success: function (result) {
+                    //console.log(result);
+                    $.each(result, function (i, data) {
+                        $('#Province').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                    });
+                }
+            });
+        }
+
+
+    </script>
+
+
+
+    <!-- Start Date Thai-->
+    <script>
+        // Custom function to convert Gregorian year to Thai Buddhist year
+        //function toThaiYear(gregorianDate) {
+        //    var gregorianYear = gregorianDate.getFullYear();
+        //    var thaiYear = gregorianYear + 543;
+        //    return thaiYear;
+        //}
+    </script>
+
+    @*<script>
+
+        //Function to initialize Flatpickr with Thai year formatting
+        function initFlatpickr() {
+            const flatpickrInstance = flatpickr("#dateInput", {
+                dateFormat: "d/m/Y",
+                placeholder: "กรุณาเลือกวันที่",
+                //formatDate: function (date, formatStr) {
+                //    var thaiYear = toThaiYear(date);
+                //    formatStr = formatStr.replace("Y", thaiYear);
+                //    return flatpickr.formatDate(date, formatStr);
+                //}
+            });
+        }
+
+        // Call the initialization function when the DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+
+            initFlatpickr();
+        });
+    </script>*@
+
+    @*<script>
+        // Function to initialize Flatpickr with Thai year formatting for datetime input
+        function initFlatpickrForDatetimeInput() {
+            flatpickr("#datetimeInput", {
+                enableTime: true,
+                time_24hr: true,
+                dateFormat: "d/m/Y H:i",
+                placeholder: "กรุณาเลือกวันที่และเวลา",
+                //formatDate: function (date, formatStr) {
+                //    var thaiYear = toThaiYear(date);
+                //    formatStr = formatStr.replace("Y", thaiYear);
+                //    return flatpickr.formatDate(date, formatStr);
+                //}
+            });
+
+        }
+
+        // Call the initialization function when the DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+
+
+            //var datetimeInput = document.getElementById("datetimeInput");
+            //var selectedDateTime = datetimeInput[0].value;
+
+            //console.log(selectedDateTime);
+            initFlatpickrForDatetimeInput();
+
+        });
+    </script>*@
+
+}
+
+@*
+<script>
+    $(document).ready(function () {
+        $('#image').on('change', function () {
+            var input = $(this)[0];
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#image-preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        });
+    });
+</script>
+<!--Show preview Pic-->
+<script>
+    function previewFile() {
+        var preview = document.querySelector('#preview');
+        var file = document.querySelector('#file').files[0];
+        var reader = new FileReader();
+
+        reader.addEventListener("load", function () {
+            preview.src = reader.result;
+            preview.style.display = "block";
+        }, false);
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+</script>*@
+<!--End Show preview Pic-->

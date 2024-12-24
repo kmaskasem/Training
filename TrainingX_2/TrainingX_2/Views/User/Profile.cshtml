@@ -1,0 +1,361 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@using TrainingX_2.Areas.Identity.Data
+@inject UserManager<User> UserManager
+@model TrainingX_2.Areas.Identity.Data.User
+@{
+    ViewData["Title"] = "โปรไฟล์";
+}
+
+
+<div class="m-1 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+    <div class="mb-3">
+        <h2 class="text-center">@ViewData["Title"]</h2>
+    </div>
+    <hr />
+    <form asp-controller="User" asp-action="Edit" method="post" id="EditUserForm" style="none;" enctype="multipart/form-data">
+        <div class="row mx-0 my-2">
+
+            <div class="col-md-4 col-sm-auto ">
+                <div class="row">
+
+                    <div class="row">
+                        <div class=" justify-content-center mb-3 rounded">
+                            @if (Model.Profile_picture == null)
+                            {
+                                <img id="previewProfile"  src="@("~/uploads/Sample_User_Icon.jpg")" class="rounded" width="100%" margin: auto asp-append-version="true" />
+                            }
+                            else
+                            {
+                                <img id="previewProfile" src="@("~/uploads/profile/"+@Model.Profile_picture)" class="rounded" width="100%" margin: auto asp-append-version="true" />
+                            }
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="form-group">
+                            <label asp-for="@Model.ImageFile"></label>
+                            <input type="hidden" id="pre_input" name="pre_input" />
+                            <input asp-for="@Model.ImageFile" accept="image/jpeg, image/png" 
+                            onchange="readURL(this);" class="form-control" />
+                            <span asp-validation-for="@Model.ImageFile" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <br />
+            </div>
+            <div class="col-md-8 col-sm-auto">
+                <div class="col-12">
+                    <div class="row justify-content-center">
+                        <div class="form-group col-4">
+                            <label asp-for="@Model.Name_title" class="control-label"></label>
+                            <select asp-for="@Model.Name_title" asp-items="@Html.GetEnumSelectList<NameTitle>()" class="form-control">
+                                <option value="">--เลือกคำนำหน้าชื่อ--</option>
+                                @*                             <option selected="@Model.Name_title" value="@Model.Name_title">@Model.Name_title</option>
+                                *@
+                            </select>
+                            <span asp-validation-for="@Model.Name_title" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-4">
+                            <label asp-for="@Model.FirstName" class="control-label">ชื่อ</label>
+                            <input asp-for="@Model.FirstName" value="@Model.FirstName" class="form-control" />
+                        </div>
+                        <div class="form-group col-4">
+                            <label asp-for="@Model.LastName" class="control-label"></label>
+                            <input asp-for="@Model.LastName" value="@Model.LastName" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="form-group col">
+                            <label asp-for="@Model.Birthday" class="control-label"></label>
+                            
+                            @if (Model.Birthday.HasValue)
+                            {
+                                <input asp-for="@Model.Birthday" class="form-control" 
+                                value="@Model.Birthday.Value.ToString("yyyy-MM-dd"
+                                , System.Globalization.CultureInfo.InvariantCulture)" />
+                            }
+                            else
+                            {
+                                <input asp-for="@Model.Birthday" class="form-control" value="@Model.Birthday" />
+                            }
+                        </div>
+
+                        <div class="form-group col">
+                            <label asp-for="@Model.PhoneNumber" class="control-label">เบอร์ติดต่อ</label>
+                            <input asp-for="@Model.PhoneNumber" value="@Model.PhoneNumber" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="form-group">
+                            <label asp-for="@Model.Address"></label>
+                            <textarea asp-for="@Model.Address_street" type="text" class="form-control" id="Name" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group mt-2">
+                                <label asp-for="@Model.Address_province">จังหวัด</label>
+                                <select asp-for="@Model.Address_province" asp-items="(IEnumerable<SelectListItem>)@ViewData["Provinces"]" id="Province" class="form-control">
+                                    <option value="">--เลือกจังหวัด--</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group mt-2">
+                                <label asp-for="@Model.Address_district">อำเภอ</label>
+                                <select asp-for="@Model.Address_district" asp-items="(IEnumerable<SelectListItem>)@ViewData["Districts"]" id="District" class="form-control">
+                                    <option value="">--เลือกอำเภอ--</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group mt-2">
+                                <label asp-for="@Model.Address_subdistrict">ตำบล</label>
+                                <select asp-for="@Model.Address_subdistrict" asp-items="(IEnumerable<SelectListItem>)@ViewData["Subdistricts"]" id="Subdistrict" class="form-control">
+                                    <option value="">--เลือกตำบล--</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group mt-2">
+                                <label asp-for="@Model.Address_zipcode">รหัสไปรษณีย์</label>
+                                <input id="ZipcodeShow" class="form-control" value="@Model.Address_zipcode" disabled />
+                                <input asp-for="@Model.Address_zipcode" type="hidden" id="Zipcode" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <label asp-for="@Model.Email"></label>
+                        <div class="row mx-0">
+                            <div class="form-group col-6 px-0">
+                                <input asp-for="@Model.Email" value="@Model.Email" class="form-control" disabled />
+                            </div>
+                            <div class="col-6 text-end  px-0">
+                                <button type="submit" onclick="" class="btn btn-primary">บันทึก</button>
+                                <button type="button" onclick="refreshPage();" class="btn btn-outline-primary">ยกเลิก</button>
+                                <input type="hidden" asp-for="@Model.Id" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+    <div class="row mx-0 my-4" id="DetailSection">
+
+        <div class="col-md-4 col-sm-auto">
+            <div class="row">
+                <div class="row">
+                    <div class=" justify-content-center mb-5 align-items-center rounded" style="height: 140px;">
+                        @if (Model.Profile_picture == null)
+                        {
+                            <img src="@("~/uploads/Sample_User_Icon.jpg")" class="rounded" width="100%" margin: auto asp-append-version="true" />
+                        }
+                        else
+                        {
+                            <img src="@("~/uploads/profile/"+@Model.Profile_picture)" class="rounded" width="100%" margin: auto asp-append-version="true" />
+                        }
+                    </div>
+                </div>
+            </div>
+            <br />
+        </div>
+        <div class="col-md-8 col-sm-auto">
+            <div class="col-12">
+                <div class="row justify-content-center">
+
+                    <div class="form-group col-4">
+                        <label asp-for="@Model.Name_title" class="control-label"></label>
+                        @if (Model.Name_title == null)
+                        {
+                            <input id="Name_title" asp-for="@Model.Name_title" class="form-control" disabled placeholder="-" />
+                        }
+                        else
+                        {
+                            <input id="Name_title" asp-for="@Model.Name_title" class="form-control" disabled />
+                        }
+                    </div>
+                    <div class="form-group col-4">
+                        <label asp-for="@Model.FirstName" class="control-label">ชื่อ</label>
+                        <input asp-for="@Model.FirstName" value="@Model.FirstName" class="form-control" disabled />
+                    </div>
+                    <div class="form-group col-4">
+                        <label asp-for="@Model.LastName" class="control-label"></label>
+                        <input asp-for="@Model.LastName" value="@Model.LastName" class="form-control" disabled />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="form-group col">
+                        <label asp-for="@Model.Birthday" class="control-label"></label>
+                        @if (Model.Birthday.HasValue)
+                        {
+                            <input asp-for="@Model.Birthday" class="form-control" disabled
+                                   value="@Model.Birthday.Value.ToString("yyyy-MM-dd"
+                                   , System.Globalization.CultureInfo.InvariantCulture)" />
+                        }
+                        else
+                        {
+                            <input asp-for="@Model.Birthday" class="form-control" disabled value="@Model.Birthday" />
+                        }
+                    </div>
+
+                    <div class="form-group col">
+                        <label asp-for="@Model.PhoneNumber" class="control-label">เบอร์ติดต่อ</label>
+                        <input asp-for="@Model.PhoneNumber" value="@Model.PhoneNumber" class="form-control" disabled />
+
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="form-group">
+                        <label asp-for="@Model.Address"></label>
+                        @if (Model.Address == null)
+                        {
+                            <textarea class="form-control" asp-for="@Model.Address" rows="3" disabled></textarea>
+                        }
+                        else
+                        {
+                            <textarea class="form-control" value="@Model.Address" asp-for="@Model.Address" rows="3" disabled></textarea>
+                        }
+
+                    </div>
+
+                </div>
+                <div class="row mt-3">
+                    <label asp-for="@Model.Email"></label>
+                    <div class="row mx-0">
+                        <div class="form-group col-6 px-0">
+                            <input asp-for="@Model.Email" value="@Model.Email" class="form-control" disabled />
+                        </div>
+                        <div class="col-6 text-end  px-0">
+                            <button type="button" onclick="editProfileHandler('@Model.Profile_picture');" class="btn btn-primary">แก้ไข</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3 justify-content-end">
+                    <div class="col-1">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script type="text/javascript">
+        var DetailSection = document.getElementById('DetailSection');
+        var EditUserForm = document.getElementById('EditUserForm');
+        //let pre_pic = '';
+        EditUserForm.style.display = 'none';
+
+        //var previewImage = document.getElementById('browse_input');
+        var pre_input = document.getElementById('pre_input');
+
+        function readURL(input) {
+            var previewImage = document.getElementById('previewProfile');
+            if (input.files && input.files[0]) {
+
+                console.log(input);
+                console.log(input.value);
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+            else
+            {
+                previewImage.src = '@Url.Content("~/uploads/Sample_User_Icon.jpg")';
+                pre_input.value = null;
+            }
+        }
+
+        function editProfileHandler(img) {
+            //pre_pic = img;
+            pre_input.value = img;
+            DetailSection.style.display = 'none';
+            EditUserForm.style.display = 'inline-flex';
+        }
+
+        //getDistrict
+        $('#Province').change(function () {
+            var prv = $(this).val();
+            $('#District').empty();
+            $('#District').append('<option value="">--เลือกอำเภอ--</option>');
+            $('#Subdistrict').empty();
+            $('#Subdistrict').append('<option value="">--เลือกตำบล--</option>');
+            $('#ZipcodeShow').val("");
+            $('#Zipcode').val("");
+            if (prv != null) {
+                $.ajax({
+                    url: '/Cascade/District?name=' + prv,
+                    success: function (result) {
+                        //console.log(result);
+                        $.each(result, function (i, data) {
+                            $('#District').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                        });
+                    }
+                });
+            }
+        });
+
+        //getSubdistrict
+        $('#District').change(function () {
+            var dst = $(this).val();
+            $('#Subdistrict').empty();
+            $('#Subdistrict').append('<option value="">--เลือกตำบล--</option>');
+            $('#ZipcodeShow').val("");
+            $('#Zipcode').val("");
+            if (dst != null) {
+                $.ajax({
+                    url: '/Cascade/Subdistrict?name=' + dst,
+                    success: function (result) {
+                        //console.log(result);
+                        $.each(result, function (i, data) {
+                            $('#Subdistrict').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                        });
+                    }
+                });
+            }
+        });
+
+        //getZipcode
+        $('#Subdistrict').change(function () {
+            var sdt = $(this).val();
+            $('#ZipcodeShow').val("");
+            $('#Zipcode').val("");
+            if (sdt != null) {
+                $.ajax({
+                    url: '/Cascade/Zipcode?name=' + sdt,
+                    success: function (result) {
+                        console.log(result);
+                        $('#ZipcodeShow').val(result.zipCode);
+                        $('#Zipcode').val(result.zipCode);
+                    }
+                });
+            }
+        });
+
+        function getProvince() {
+            $.ajax({
+                url: '/Cascade/Province',
+                success: function (result) {
+                    //console.log(result);
+                    $.each(result, function (i, data) {
+                        $('#Province').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                    });
+                }
+            });
+        }
+
+        function refreshPage() {
+            location.reload();
+        }
+
+    </script>
+    }

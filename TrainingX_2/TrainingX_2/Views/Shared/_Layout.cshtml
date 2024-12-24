@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TrainingX_2</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TrainingX_2.styles.css" asp-append-version="true" />
+    @*    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    *@
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@latest/dist/flatpickr.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Option 1: Include in HTML -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+
+    <style>
+        .content {
+            position: absolute;
+            padding-top: 100px;
+            background-color: white;
+        }
+
+        img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <header>
+        <nav class="navbar fixed-top navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3" style="background-color: #152443;z-index: 1;">
+
+            <partial name="_LoginPartial">
+
+        </nav>
+    </header>
+    <div class="container" style="padding-top: 75px;">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2566 - TrainingX_Demo - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        var image = null;
+        image = document.getElementById('imagePreview');
+        //console.log(image);
+        // Check image size after loading
+        //image.addEventListener('load', function () {
+        if (image != null) {
+            const imageWidth = image.naturalWidth;
+            const imageHeight = image.naturalHeight;
+
+            console.log(imageHeight);
+            console.log(imageWidth);
+            if (imageHeight > imageWidth) {
+                image.style.height = '30px'; // Change height to 50px
+                image.style.width = 'auto'; // Auto adjust width to maintain aspect ratio
+            } else {
+                image.style.width = '30px'; // Change width to 50px
+                image.style.height = 'auto'; // Auto adjust height to maintain aspect ratio
+            }
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,53 @@
+﻿@page
+@model ExternalLoginsModel
+@{
+    ViewData["Title"] = "Manage your external logins";
+    ViewData["ActivePage"] = ManageNavPages.ExternalLogins;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+@if (Model.CurrentLogins?.Count > 0)
+{
+    <h3>Registered Logins</h3>
+    <table class="table">
+        <tbody>
+            @foreach (var login in Model.CurrentLogins)
+            {
+                <tr>
+                    <td Id="@($"login-Provider-{login.LoginProvider}")">@login.ProviderDisplayName</td>
+                    <td>
+                        @if (Model.ShowRemoveButton)
+                        {
+                            <form Id="@($"remove-login-{login.LoginProvider}")" asp-page-handler="RemoveLogin" method="post">
+                                <div>
+                                    <input asp-for="@login.LoginProvider" name="LoginProvider" type="hIdden" />
+                                    <input asp-for="@login.ProviderKey" name="ProviderKey" type="hIdden" />
+                                    <button type="submit" class="btn btn-primary" title="Remove this @login.ProviderDisplayName login from your account">Remove</button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            @: &nbsp;
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (Model.OtherLogins?.Count > 0)
+{
+    <h4>Add another service to log in.</h4>
+    <hr />
+    <form Id="link-login-form" asp-page-handler="LinkLogin" method="post" class="form-horizontal">
+        <div Id="socialLoginList">
+            <p>
+                @foreach (var Provider in Model.OtherLogins)
+                {
+                    <button Id="@($"link-login-button-{Provider.Name}")" type="submit" class="btn btn-primary" name="Provider" value="@Provider.Name" title="Log in using your @Provider.DisplayName account">@Provider.DisplayName</button>
+                }
+            </p>
+        </div>
+    </form>
+}

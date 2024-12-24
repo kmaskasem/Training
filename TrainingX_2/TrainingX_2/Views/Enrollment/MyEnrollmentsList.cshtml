@@ -1,0 +1,314 @@
+﻿@using TrainingX_2.Models.Training;
+@model TrainingX_2.Controllers.PaginatedList<TrainingX_2.Models.Training.Enrollment>
+
+@{
+    ViewData["Title"] = "การลงทะเบียนของฉัน";
+    int sequence = ((Model.PageIndex - 1) * Model.PageSize) + 1;
+}
+<!-- Content -->
+<div class="m-0 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+    <div class="mb-4">
+        <h2>@ViewData["Title"]</h2>
+    </div>
+
+    <!-- Search Button -->
+    @*<div class="row my-3">
+    <div class="col-md-10">
+    <div class="col-md-8">
+    <button id="btn" type="button" class="btn btn-outline-primary justify-content-center">
+    <i class="bi bi-search"></i>
+    <span>ค้นหา</span>
+    </button>
+    </div>
+    </div>
+    </div>*@
+    <!-- End Search Button -->
+    <!-- รายละเอียดการค้นหา -->
+    <form asp-controller="Enrollment" asp-action="MyEnrollmentsList" method="get" id="searchForm" style="display: inline;">
+        <div class="row mx-0 mb-4 pb-4 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+            <div class="row m-0 g-3 justify-content-between">
+                <div class="col-md-4">
+                    <label for="mySelect">กิจกรรมอบรม</label>
+                    <select class="form-control" id="SelectTrainingName" name="searchTrainingName" asp-items="(IEnumerable<SelectListItem>)@ViewData["Trainings"]">
+                        <option value="">-- เลือกกิจกรรม --</option>
+                    </select>
+                </div>
+                <div class="col-md-4 pe-2">
+                    <label for="searchCategory">ประเภทของกิจกรรมอบรม</label>
+                    <select class="form-control" id="SelectCategory" name="searchTrainingCategory" asp-items="(IEnumerable<SelectListItem>)@ViewData["Categories"]">
+                        <option value="">-- เลือกประเภทกิจกรรม --</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" id="filter" class="btn btn-primary  btn-block">Filter</button>
+                </div>
+            </div>
+
+        </div>
+
+    </form>
+    <!-- ปิดรายละเอียดการค้นหา -->
+    <!-- Table -->
+    <div class="rounded mt-4" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+
+        <div class="table-responsive w-100 m-2 p-2">
+            <table class="table">
+                <thead>
+                    <tr style="text-align: center">
+                        <th width="10%">ลำดับ</th>
+                        <th width="55%">ชื่อกิจกรรม</th>
+                        <th width="20%">ประเภทกิจกรรม</th>
+                        <th width="15%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (@Model.Any())
+                    {
+                        @foreach (var item in @Model)
+                        {
+                            <tr>
+                                <td class="Sequence" style="text-align: center">
+                                    <span Id="@item.Id">@(sequence++)</span>
+                                </td>
+                                <td>
+                                    <div>
+                                        <p>@item.Training.Name</p>
+                                    </div>
+                                    <div class="mt-1">
+                                        @using (Html.BeginForm("Detail", "Training", FormMethod.Get))
+                                        {
+                                            <div class="row">
+                                                <div class="col-md-3 col-sm-6">
+                                                    <input type="hidden" name="id" value="@item.Training.Id" />
+                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                        ดูรายละเอียด
+                                                    </button>
+                                                </div>
+                                                @if (item.Training.Cost == 0)
+                                                {
+                                                    <div class="col-md-3 col-sm-6">
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                                value="@item.Id"
+                                                                onclick="Cancel(this)">
+                                                            ยกเลิกการลงทะเบียน
+                                                        </button>
+                                                    </div>
+                                                }
+                                                <div class="col-md-6 col-sm-12">
+                                                    <div class="row m-0 p-0 EPhone">
+                                                        <span class="pt-1" id="dataPhone">
+                                                            เบอร์ติดต่อ : <span id="spanPhone">@item.Phone</span>
+                                                            <button type="button" id="EditPhone" class="btn btn-secondary ms-1" style="width: 30px; height: 25px;">
+                                                                <i class="bi bi-pencil-square d-flex justify-content-center" style="position:relative; top:-3px;"></i>
+                                                            </button>
+                                                        </span>
+
+                                                        <div class="row" id="divPhone">
+                                                            <input type="text" class="form-control" value="@item.Phone" style="display:none" id="phoneInput" />
+                                                            <button type="button" class="btn btn-primary btn-sm px-3 opacity-75" id="UpdatePhone" style="display:none">ยืนยัน</button>
+                                                            <button type="button" class="btn btn-secondary cancel-btn btn-sm px-3 opacity-75" id="CancelPhone" style="display:none">ยกเลิก</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <span class="text-danger m-1" id="errrow"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
+                                <td style="text-align: center">
+                                    <div>
+                                        <p>@item.Training.Category.Name</p>
+                                    </div>
+                                </td>
+                                <td class="px-4">
+                                    <div class="d-flex justify-content-end">
+                                        @if (item.Training.Cost > 0)
+                                        {
+                                            <p>ค่าอบรม: @item.Training.Cost บาท</p>
+
+                                        }
+                                        else
+                                        {
+                                            <p> ค่าอบรม: <span class="badge badge-success">ฟรี</span></p>
+                                        }
+
+                                    </div>
+                                    <div class="d-flex justify-content-end">
+                                        @if (item.Check_status == Status_Enroll.ยังไม่ตรวจสอบ)
+                                        {
+                                            <button id="testbtn" type="button" class="btn btn-secondary btn-sm px-2 opacity-75 open-model1-btn"
+                                                    value="@item.Id">
+                                                @item.Check_status
+                                            </button>
+                                        }
+                                        else if (item.Check_status == Status_Enroll.ตรวจสอบไม่ผ่าน)
+                                        {
+                                            <button type="button" class="btn btn-danger btn-sm px-2 opacity-75" onclick="">@item.Check_status</button>
+                                        }
+                                        else if (item.Check_status == Status_Enroll.ตรวจสอบผ่าน)
+                                        {
+                                            <button type="button" class="btn btn-success btn-sm px-2 opacity-75" onclick="">@item.Check_status</button>
+                                        }
+                                    </div>
+                                    @if (item.Note != null)
+                                    {
+                                        <div><span>หมายเหตุ : @item.Note</span></div>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="py-5" style="text-align: center">ไม่พบข้อมูล</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+
+        @{
+            var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+            var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+        }
+
+        <a asp-action="Index"
+           asp-route-pageNumber="@(Model.PageIndex - 1)"
+           class="btn btn-default @prevDisabled">
+            Previous
+        </a>
+        <a asp-action="Index"
+           asp-route-pageNumber="@(Model.PageIndex + 1)"
+           class="btn btn-default @nextDisabled">
+            Next
+        </a>
+    </div>
+    <!-- End Table -->
+
+</div>
+
+<!-- End Content-->
+<!-- checkboxModal -->
+<div class="modal fade" id="CancelModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <!--  -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Cancel" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="eid" />
+                    <div class="row pe-0 mt-2 text-center">
+                        <p class="font-weight-bold mb-0">คุณต้องการ <span class="font-italic">ยกเลิก</span> การลงทะเบียนนี้ใช่หรือไม่ ?</p>
+                    </div>
+                </div>
+                <div class="d-flex m-3 justify-content-end">
+                    <button type="submit" class="btn btn-primary">ยืนยัน</button>
+                </div>
+            </form>
+        </div>
+        <!--  -->
+    </div>
+</div>
+<!-- End checkboxModal -->
+@section scripts{
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // คลิกที่ปุ่ม EditPhone
+            document.getElementById("EditPhone").addEventListener("click", function () {
+                // ซ่อน spanPhone
+                document.getElementById("spanPhone").style.display = "none";
+
+                // แสดง input element
+                var phoneInput = document.getElementById("phoneInput");
+                phoneInput.style.display = "block";
+
+                // แสดงปุ่ม UpdatePhone และ CancelPhone
+                document.getElementById("UpdatePhone").style.display = "inline-block";
+                document.getElementById("CancelPhone").style.display = "inline-block";
+            });
+
+            // คลิกที่ปุ่ม CancelPhone
+            document.getElementById("CancelPhone").addEventListener("click", function () {
+                // แสดง spanPhone
+                document.getElementById("spanPhone").style.display = "inline";
+
+                // ซ่อน input element และปุ่ม UpdatePhone และ CancelPhone
+                var phoneInput = document.getElementById("phoneInput");
+                phoneInput.style.display = "none";
+                document.getElementById("UpdatePhone").style.display = "none";
+                document.getElementById("CancelPhone").style.display = "none";
+            });
+
+            // คลิกที่ปุ่ม UpdatePhone
+            document.getElementById("UpdatePhone").addEventListener("click", function () {
+                // ดึงค่าจาก input element
+                var newPhoneNumber = document.getElementById("phoneInput").value;
+               
+                // ส่งค่า newPhoneNumber ไปยังเซิร์ฟเวอร์เพื่อบันทึกข้อมูล (ใช้ AJAX หรือแบบอื่นตามความเหมาะสม)
+                $.ajax({
+                    type: "POST",
+                    url: "/Enrollment/UpdatePhoneNumber", // แทน YourController ด้วยชื่อ Controller ของคุณ
+                    data: {
+                        Id: element.getAttribute('id'),
+                        phone: newPhoneNumber
+                    },
+                    success: function (data) {
+                        if (data.currAffect < 1) {
+                            console.log(data.currData);
+                            console.log("Update Data Failed " + data.currAffect);
+                        } else {
+                            console.log(data.currData);
+                            console.log("Update Data Success " + data.currAffect);
+                        }
+                        // หลังจากบันทึกข้อมูลเสร็จสมบูรณ์
+                        document.getElementById("spanPhone").textContent = newPhoneNumber;
+                        console.log(newPhoneNumber);
+                        document.getElementById("spanPhone").style.display = "inline";
+                        document.getElementById("phoneInput").style.display = "none";
+                        document.getElementById("UpdatePhone").style.display = "none";
+                        document.getElementById("CancelPhone").style.display = "none";
+                    },
+                    error: function () {
+                        // กรณีเกิดข้อผิดพลาด
+                        $("#errrow").text("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+                    }
+                });
+                // แสดงค่าใหม่ใน spanPhone
+                document.getElementById("spanPhone").textContent = newPhoneNumber;
+
+                // แสดง spanPhone และซ่อน input element และปุ่ม UpdatePhone และ CancelPhone
+                document.getElementById("spanPhone").style.display = "inline";
+                document.getElementById("phoneInput").style.display = "none";
+                document.getElementById("UpdatePhone").style.display = "none";
+                document.getElementById("CancelPhone").style.display = "none";
+            });
+        });
+    </script>
+
+
+    <script type="text/javascript">
+        
+        console.log("Loaded");
+        var c = 0;
+        //ยกเลิกลงทะเบียน
+        function Cancel(element) {
+            c = c + 1;
+            console.log(c);
+            console.log(element.value);
+            //var eid = element.value;
+            $("#eid").val(element.value);
+            $("#CancelModal").modal("show");
+        }
+
+        
+
+    </script>
+
+}

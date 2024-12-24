@@ -1,0 +1,176 @@
+﻿@model TrainingX_2.Areas.Identity.Data.User
+
+@{
+    ViewData["Title"] = "ข้อมูลผู้ใช้";
+}
+
+<div class="m-1 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+
+    <div class="row">
+        <div class="col-4 col-sm-auto mb-5">
+            <div class="mx-auto" style="wIdth: 300px;">
+                <div class=" justify-content-center align-items-center rounded" style="height: 140px; background-color: rgb(233, 236, 239);">
+                    @if (Model.Profile_picture != null)
+                    {
+                        <img src="@("~/uploads/profile/"+Model.Profile_picture)" class="rounded" wIdth="100%" margin: auto asp-append-version="true" />
+
+                        @*                <img src="@("/images/training/img/"+Model.Training_picture)" class="card-img-top" alt="...">
+                    *@            }
+                    else
+                    {
+                        <img src="@("~/uploads/Sample_User_Icon.jpg")" class="rounded" wIdth="100%" margin: auto asp-append-version="true" />
+                    }
+                </div>
+            </div>
+
+            <br />
+        </div>
+        <div class="col-md-8">
+
+            <div class="row justify-content-center">
+                <div class="row">
+
+                    <div class="form-group col-2">
+                        <label asp-for="@Model.Name_title" class="control-label"></label>
+                        @if (Model.Name_title == null)
+                        {
+                            <input asp-for="@Model.Name_title" class="form-control" disabled placeholder="-" />
+                        }
+                        else
+                        {
+                            <input asp-for="@Model.Name_title" class="form-control" disabled />
+                        }
+                    </div>
+                    <div class="form-group col">
+                        <label asp-for="@Model.FirstName" class="control-label">ชื่อ</label>
+                        <input asp-for="@Model.FirstName" class="form-control" disabled />
+                    </div>
+                    <div class="form-group col">
+                        <label asp-for="@Model.LastName" class="control-label"></label>
+                        <input asp-for="@Model.LastName" class="form-control" disabled />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="form-group col">
+                        <label asp-for="@Model.Birthday" class="control-label"></label>
+                        <input asp-for="@Model.Birthday" class="form-control" disabled />
+                    </div>
+
+                    <div class="form-group col">
+                        <label asp-for="@Model.PhoneNumber" class="control-label">เบอร์ติดต่อ</label>
+                        <input asp-for="@Model.PhoneNumber" class="form-control" disabled />
+
+                    </div>
+                </div>
+
+
+                <div class="row mt-3">
+                    <div class="form-group">
+                        <label asp-for="@Model.Address"></label>
+                        @if (Model.Address == null)
+                        {
+                            <textarea class="form-control" asp-for="@Model.Address" rows="3" disabled></textarea>
+                        }
+                        else
+                        {
+                            <textarea class="form-control" asp-for="@Model.Address" rows="3" disabled></textarea>
+                        }
+
+                    </div>
+
+                </div>
+
+                <div class="row mt-3">
+                    <div class="form-group col-6">
+                        <label asp-for="@Model.Email"></label>
+                        <input asp-for="@Model.Email" class="form-control" disabled />
+                    </div>
+                    <div class="form-group col-6">
+                    </div>
+                </div>
+
+                <div class="form-group mt-3 row">
+                    <label asp-for="@Model.Status_user" class="mb-1"></label>
+                    <div>
+                        @if (@Model.Status_user == TrainingX_2.Areas.Identity.Data.Status.ใช้งาน)
+                        {
+                            <button Id="sts" type="button" class="btn btn-success btn-sm rounded-pill px-3 opacity-75" value="0" onclick="ChangeStatus(this,'@Model.Id')">@Model.Status_user</button>
+                        }
+                        else
+                        {
+                            <button Id="sts" type="button" class="btn btn-danger btn-sm rounded-pill px-3 opacity-75" value="1" onclick="ChangeStatus(this,'@Model.Id')">@Model.Status_user</button>
+                        }
+                    </div>
+                </div>
+                <br />
+
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group">
+            <div class="row justify-content-end">
+                <div class="">
+                    @*                <img src="@("~/images/profile/admin.jpg")" class="rounded" wIdth="50%" margin: auto asp-append-version="true" />
+                    *@
+                </div>
+                <div class="col-xs-7 col-md-2">
+                    @Html.ActionLink("< Back to Home","Index")
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script type="text/javascript">
+        //Status Button
+        function ChangeStatus(element, Id) {
+
+            //console.log(this);
+            //console.log(Id);
+
+            var CurrStatus = null;
+            var CurrId = null;
+
+            CurrStatus = element;
+            CurrId = Id;
+
+            $.ajax({
+                type: "POST",
+                url: "/User/ChangeStatus",
+                data: { Id: CurrId },
+                success: function (response) {
+                    //console.log(response.currData);
+
+                    if (response.currAffect > 0) {
+                        console.log(response.currData.status_user);
+                        if (response.currData.status_user == 1) {
+
+                            $(CurrStatus).removeClass("btn-success").addClass("btn-danger");
+                            CurrStatus.innerText = "ไม่ใช้งาน";
+                            CurrStatus.value = '@TrainingX_2.Areas.Identity.Data.Status.ไม่ใช้งาน';
+
+                        } else {
+
+                            $(CurrStatus).removeClass("btn-danger").addClass("btn-success");
+                            CurrStatus.innerText = "ใช้งาน";
+                            CurrStatus.value = '@TrainingX_2.Areas.Identity.Data.Status.ใช้งาน';
+                        }
+
+                    } else {
+                        console.log("Update Status Failed " + response);
+                        console.log(response.currAffect);
+                        console.log(response.currId);
+                    }
+                }
+            });
+
+        }
+
+
+    </script>
+    }

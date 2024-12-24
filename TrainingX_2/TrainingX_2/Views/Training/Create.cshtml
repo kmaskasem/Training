@@ -1,0 +1,350 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using TrainingX_2.Areas.Identity.Data
+
+@*@inject SignInManager<User> SignInManager*@
+@inject UserManager<User> UserManager
+
+@model TrainingX_2.Models.Training.Training
+@{
+    ViewData["Title"] = "สร้างประกาศอบรม";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag/dist/css/multi-select-tag.css">
+@*<div class="modal fade" id="NewModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog modal-xl modal-dialog-scrollable">*@
+<div class="modal-content">
+    <div class="modal-header justify-content-center">
+        <h5 class="modal-title" id="exampleModalLabel">@ViewData["Title"]</h5>
+    </div>
+    <div class="modal-body">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label asp-for="Name" class="form-label">ชื่อกิจกรรมอบรม <span class="text-danger">*</span></label>
+                            <textarea asp-for="Name" type="text" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col-md-12">
+                            <label>
+                                ประเภทของการอบรม <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="CategId" id="multiple-select" class="form-control my-2" asp-items="ViewBag.Categories">
+                                <option value="">-- เลือกประเภท --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="ImageFile" class="form-label">ภาพโปรโมทกิจกรรมอบรม</label>
+                        <input asp-for="ImageFile" type="file" accept="image/jpeg, image/png" id="image" onchange="previewFile(this)" class="form-control me-5" />
+                        <span asp-validation-for="ImageFile" class="text-danger"></span>
+                    </div>
+                    <div class="row p-2">
+                        <div class="d-flex justify-content-center">
+                            <img id="preview" src="~/uploads/photography.jpg" alt="Preview" style="display: flex; width: 300px;border-radius:10%; border-style: solid; border-color: darkgrey; border-width: 1px; " />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-12">
+                    <label asp-for="Description" class="form-label">รายละเอียดกิจกรรมอบรม</label>
+                    <textarea asp-for="Description" type="text" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-6">
+                    <label asp-for="Lecturer" class="form-label">ชื่อวิทยากร</label>
+                    <input asp-for="Lecturer" type="text" class="form-control" id="Name">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="ScheduleFile" class="form-label">ไฟล์เอกสารกำหนดการในการดำเนินกิจกรรม</label>
+                    <input asp-for="ScheduleFile" class="form-control"
+                           id="inputFile" accept="application/pdf">
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-12">
+                    <label asp-for="Objectives" class="form-label">วัตถุประสงค์ของการอบรม</label>
+                    <textarea asp-for="Objectives" type="text" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-4">
+                    <label asp-for="Start_train_Date" class="form-label">วันที่เริ่ม <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input name="Start_train_Date" type="date" class="form-control" id="dateInput" placeholder="กรุณาเลือกวันที่" />
+                        @* <span class="input-group-text">
+                        <i class="bi bi-calendar" style="width: 25px; height: 25px; position: relative; top: -3px;"></i>
+                        </span> *@
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="End_train_Date" class="form-label">วันที่สิ้นสุด <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input name="End_train_Date" type="date" class="form-control" id="dateInput" placeholder="กรุณาเลือกวันที่" />
+                        @* <span class="input-group-text">
+                        <i class="bi bi-calendar" style="width: 25px; height: 25px; position: relative; top: -3px;"></i>
+                        </span> *@
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Hours" class="form-label">ระยะเวลา (ชั่วโมง) <span class="text-danger">*</span></label>
+                    <input asp-for="Hours" type="number" class="form-control" id="Name" value="0" min="0">
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-4">
+                    <label for="dateInput" class="form-label">วันที่เริ่มต้นการลงทะเบียน <span class="text-danger">*</span></label>
+                    <div class="input-group">
+
+                        <input type="datetime-local" id="datetimeInput" name="Start_enroll_Date" required class="form-control" placeholder="กรุณาเลือกวันที่" />
+                        @*                        <input name="Start_enroll_Date" type="datetime-local" class="form-control" id="datetimeInput" placeholder="กรุณาเลือกวันที่" />
+                        *@                        @* <span class="input-group-text">
+                        <i class="bi bi-calendar" style="width: 25px; height: 25px; position: relative; top: -3px;"></i>
+                        </span> *@
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="End_enroll_Date" class="form-label">วันที่สิ้นสุดการลงทะเบียน <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input name="End_enroll_Date" type="datetime-local" class="form-control" id="datetimeInput" placeholder="กรุณาเลือกวันที่" />
+                        @* <span class="input-group-text">
+                        <i class="bi bi-calendar" style="width: 25px; height: 25px; position: relative; top: -3px;"></i>
+                        </span> *@
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="NumberOfParticipants" class="form-label">จำนวนผู้เข้าร่วม <span class="text-danger">*</span></label>
+                    <input asp-for="NumberOfParticipants" type="number" class="form-control" value="0" id="Name" min="0">
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-12">
+                    <label asp-for="Venue_street" class="form-label">สถานที่จัดกิจกรรมอบรม</label>
+                    <textarea asp-for="Venue_street" type="text" class="form-control" id="Name" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-3">
+                    <div class="form-group mb-3">
+                        <label asp-for="Venue_province">จังหวัด</label>
+                        <select asp-for="Venue_province" id="Province" class="form-control">
+                            <option value="">--เลือกจังหวัด--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group mb-3">
+                        <label asp-for="Venue_district">อำเภอ</label>
+                        <select asp-for="Venue_district" id="District" class="form-control">
+                            <option value="">--เลือกอำเภอ--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group mb-3">
+                        <label asp-for="Venue_subdistrict">ตำบล</label>
+                        <select asp-for="Venue_subdistrict" id="Subdistrict" class="form-control">
+                            <option value="">--เลือกตำบล--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group mb-3">
+                        <label asp-for="Venue_zipcode">รหัสไปรษณีย์</label>
+                        <input id="ZipcodeShow" class="form-control" disabled />
+                        <input asp-for="Venue_zipcode" type="hidden" id="Zipcode" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-6">
+                    <label asp-for="BankId">ธนาคาร</label>
+                    <select asp-for="BankId" class="form-control my-2" asp-items="ViewBag.Banks" id="mySelect">
+                        <option value="">-- เลือกธนาคาร --</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Bank_account_number" class="form-label">เลขที่บัญชีธนาคาร</label>
+                    <input asp-for="Bank_account_number" type="text" class="form-control" id="Name">
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-6">
+                    <label asp-for="Bank_account_holder" class="form-label">ชื่อ-นามสกุลเจ้าของบัญชีธนาคาร</label>
+                    <input asp-for="Bank_account_holder" type="text" class="form-control" id="Name">
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Cost" class="form-label">ค่าใช้อบรม <span class="text-danger">*</span></label>
+                    <input asp-for="Cost" type="number" class="form-control" value="0" id="Name" min="0">
+                </div>
+            </div>
+            <div class="row my-2 justify-content-between">
+                <div class="col-md-3">
+                    <label asp-for="OwnerId" class="form-label">เจ้าของกิจกรรม</label>
+                    <input disabled type="text" class="form-control" id="Name" value="@((await UserManager.GetUserAsync(User)).FullName)">
+                    <input asp-for="OwnerId" type="hidden" value="@((await UserManager.GetUserAsync(User)).Id)" class="form-control" id="Name">
+                </div>
+                <div class="col-md-3 d-flex align-items-end flex-row-reverse">
+                    <button type="submit" class="btn btn-primary">ตกลง</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <!-- Add the flatpickr JavaScript file -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    @*    <script src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag/dist/js/multi-select-tag.js"></script>
+*@    <script type="text/javascript">
+              //var selectElement = document.querySelector('#multiple-select');
+              //selectElement.addEventListener('change', (event) => {
+              //    console.log(this);
+              //    //console.log(this.val());
+              //});
+    </script>
+    <script type="text/javascript">
+
+        getProvince();
+        function previewFile(input) {
+            if (input.files && input.files[0]) {
+                // console.log("000" + input.files[0]);
+                // console.log(input.files);
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#preview').attr('src', e.target.result).width(300);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+            else {
+                console.log(input.value);
+            }
+        }
+
+        //getDistrict
+        $('#Province').change(function () {
+            var prv = $(this).val();
+            $('#District').empty();
+            $('#District').append('<option value="">--เลือกอำเภอ--</option>');
+            if (prv != null) {
+                $.ajax({
+                    url: '/Cascade/District?name=' + prv,
+                    success: function (result) {
+                        //console.log(result);
+                        $.each(result, function (i, data) {
+                            $('#District').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                        });
+                    }
+                });
+            }
+        });
+
+        //getSubdistrict
+        $('#District').change(function () {
+            var dst = $(this).val();
+            $('#Subdistrict').empty();
+            $('#Subdistrict').append('<option value="">--เลือกตำบล--</option>');
+            if (dst != null) {
+                $.ajax({
+                    url: '/Cascade/Subdistrict?name=' + dst,
+                    success: function (result) {
+                        //console.log(result);
+                        $.each(result, function (i, data) {
+                            $('#Subdistrict').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                        });
+                    }
+                });
+            }
+        });
+
+        //getZipcode
+        $('#Subdistrict').change(function () {
+            var sdt = $(this).val();
+            $('#Zipcode').val("");
+            if (sdt != null) {
+                $.ajax({
+                    url: '/Cascade/Zipcode?name=' + sdt,
+                    success: function (result) {
+                        console.log(result);
+                        $('#ZipcodeShow').val(result.zipCode);
+                        $('#Zipcode').val(result.zipCode);
+                    }
+                });
+            }
+        });
+
+        function getProvince() {
+            $.ajax({
+                url: '/Cascade/Province',
+                success: function (result) {
+                    //console.log(result);
+                    $.each(result, function (i, data) {
+                        $('#Province').append('<option value="' + data.nameInThai + '">' + data.nameInThai + '</option>')
+                    });
+                }
+            });
+        }
+
+    </script>
+
+    <!-- Start Date Thai-->
+    <script>
+        // Custom function to convert Gregorian year to Thai Buddhist year
+        function toThaiYear(gregorianDate) {
+            var gregorianYear = gregorianDate.getFullYear();
+            var thaiYear = gregorianYear + 543;
+            return thaiYear;
+        }
+    </script>
+
+    <script>
+        // Function to initialize Flatpickr with Thai year formatting
+        function initFlatpickr() {
+            flatpickr("#dateInput", {
+                dateFormat: "d/m/Y",
+                placeholder: "กรุณาเลือกวันที่",
+                formatDate: function (date, formatStr) {
+                    var thaiYear = toThaiYear(date);
+                    formatStr = formatStr.replace("Y", thaiYear);
+                    return flatpickr.formatDate(date, formatStr);
+                }
+            });
+        }
+
+        // Call the initialization function when the DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+            initFlatpickr();
+        });
+    </script>
+
+    <script>
+        // Function to initialize Flatpickr with Thai year formatting for datetime input
+        function initFlatpickrForDatetimeInput() {
+            flatpickr("#datetimeInput", {
+                enableTime: true,
+                time_24hr: true,
+                dateFormat: "d/m/Y H:i",
+                placeholder: "กรุณาเลือกวันที่และเวลา",
+                formatDate: function (date, formatStr) {
+                    var thaiYear = toThaiYear(date);
+                    formatStr = formatStr.replace("Y", thaiYear);
+                    return flatpickr.formatDate(date, formatStr);
+                }
+            });
+        }
+
+        // Call the initialization function when the DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+            initFlatpickrForDatetimeInput();
+        });
+    </script>
+}

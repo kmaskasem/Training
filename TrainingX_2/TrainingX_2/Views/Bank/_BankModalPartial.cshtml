@@ -1,0 +1,36 @@
+﻿@model TrainingX_2.Controllers.PaginatedList<TrainingX_2.Models.Base.Bank>
+
+<!-- Modal -->
+<div class="modal-content">
+    <div class="modal-header">
+        <h1 class="modal-title fs-5" Id="exampleModalLabel">เพิ่มข้อมูล</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <form Id="formId" asp-action="Create">
+        @Html.AntiForgeryToken()
+        <div class="modal-body">
+            <div class="row">
+                <div asp-valIdation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="@Model.Bank.Name" class="control-label"></label>
+                    <input asp-for="@Model.Bank.Name" class="form-control" />
+                    <span class="text-danger" Id="errmsg"></span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+            <button type="button" class="btn btn-primary" data-save="modal">บันทึก</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValIdationScriptsPartial");
+    }
+    <script type="text/javascript">
+
+    </script>
+}

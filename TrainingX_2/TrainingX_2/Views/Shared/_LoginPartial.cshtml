@@ -1,0 +1,119 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using TrainingX_2.Areas.Identity.Data
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+<div class="container-fluid">
+    <ul class="nav justify-content-end navbar-nav flex-grow-1 navbar-dark">
+        <a class="navbar-brand me-auto" asp-area="" asp-controller="Home" asp-action="Index">
+            <div style="font-weight: bold;">
+                <span style="color:#F14A68" ;>T</span><span style="color:#00E5A1" ;>r</span><span style="color:white" ;>aining</span><span style="color:#F14A68" ;>X</span>
+            </div>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        @*<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+        <ul class="navbar-nav flex-grow-1 justify-content-end">
+        <li class="nav-item px-3">
+        <a class="nav-link navbar-dark" asp-area="" asp-controller="Home" asp-action="Index">กิจกรรมอบรมทั้งหมด</a>
+        </li>
+        <li class="nav-item px-3">
+        <a class="nav-link navbar-dark" asp-area="" asp-controller="Home" asp-action="Category">ประเภทกิจกรรมอบรม</a>
+        </li>
+        </ul>
+        </div>*@
+        @if (SignInManager.IsSignedIn(User))
+        {
+            @* <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TrainingX_2</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button> *@
+            
+            @*<li class="nav-item">
+
+        <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+        </li>*@
+            @if ((await UserManager.GetUserAsync(User)).role == Role.Member)
+            {
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1 justify-content-end">
+                        <li class="nav-item px-3">
+                            <a class="nav-link navbar-dark" asp-area="" asp-controller="Home" asp-action="Index">กิจกรรมอบรมทั้งหมด</a>
+                        </li>
+                        @* <li class="nav-item px-3">
+                <a class="nav-link navbar-dark" asp-area="" asp-controller="Home" asp-action="Category">ประเภทกิจกรรมอบรม</a>
+                </li> *@
+                    </ul>
+                </div>
+                <li class="nav-item dropdown px-3">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        กิจกรรมอบรมของฉัน
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" asp-controller="Training" asp-action="MyTraining">กิจกรรมอบรมของฉัน</a></li>
+                        <li><a class="dropdown-item" asp-controller="Enrollment" asp-action="ParticipantsList">รายชื่อผู้ร่วมอบรม</a></li>
+                        <li><a class="dropdown-item" asp-controller="Enrollment" asp-action="MyEnrollmentsList">การลงทะเบียนของฉัน</a></li>
+                        <li><a class="dropdown-item" asp-controller="Enrollment" asp-action="MyHistoryEnrollmentsList">ประวัติการลงทะเบียนของฉัน</a></li>
+                    </ul>
+                </li>
+            }
+            @if ((await UserManager.GetUserAsync(User)).role == Role.Admin)
+            {
+
+                <li class="nav-item dropdown px-3">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        การจัดการข้อมูล
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" asp-controller="User" asp-action="Index">ข้อมูลผู้ใช้งาน</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" asp-controller="Category" asp-action="Index">ข้อมูลประเภทของการอบรม</a></li>
+                        <li><a class="dropdown-item" asp-controller="Bank" asp-action="Index">ข้อมูลธนาคาร</a></li>
+                    </ul>
+                </li>
+            }
+            <li class="nav-item dropdown px-3">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    @((await UserManager.GetUserAsync(User)).FullName)
+                    @if ((await UserManager.GetUserAsync(User)).Profile_picture != null)
+                    {
+                        <img src="@("/uploads/profile/"+(await UserManager.GetUserAsync(User)).Profile_picture)" id="imagePreview" alt="Avatar" style="width:30px; border-radius:45%;">
+                    }
+                    else
+                    {
+                        <img src="~/uploads/Sample_User_Icon.jpg" alt="Avatar" id="imagePreview" style=" border-radius:45%;">
+                    }
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" asp-controller="User" asp-action="Profile">โปรไฟล์</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                        <button type="submit" class="dropdown-item">ออกจากระบบ</button>
+                    </form>
+                </ul>
+            </li>
+        }
+        else
+        {
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <ul class="navbar-nav flex-grow-1 justify-content-end">
+                    <li class="nav-item px-3">
+                        <a class="nav-link navbar-dark" asp-area="" asp-controller="Home" asp-action="Index">กิจกรรมอบรมทั้งหมด</a>
+                    </li>
+                    @* <li class="nav-item px-3">
+                <a class="nav-link navbar-dark" asp-area="" asp-controller="Home" asp-action="Category">ประเภทกิจกรรมอบรม</a>
+                </li> *@
+                </ul>
+            </div>
+            <li class="nav-item px-2">
+                <a class="nav-link navbar-dark" id="register" asp-area="Identity" asp-page="/Account/Register">สมัครสมาชิก</a>
+            </li>
+            <li class="nav-item px-2">
+                <a class="nav-link navbar-dark" id="login" asp-area="Identity" asp-page="/Account/Login">เข้าสู่ระบบ</a>
+            </li>
+        }
+    </ul>
+</div>

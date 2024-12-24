@@ -1,0 +1,439 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using TrainingX_2.Areas.Identity.Data
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@model TrainingX_2.Controllers.PaginatedList<TrainingX_2.Models.Training.Training>
+
+@{
+    ViewData["Title"] = "กิจกรรมอบรมทั้งหมด";
+    int sequence = ((Model.PageIndex - 1) * Model.PageSize) + 1;
+}
+@if (SignInManager.IsSignedIn(User))
+{
+    @if ((await UserManager.GetUserAsync(User)).role == Role.Admin)
+    {
+        <div class="m-3 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+            <div class="mb-4">
+                <h3 class="">Welcome Admin!</h3>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Content -->
+        <div class="m-3 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+            <div class="mb-4">
+                <h3 class="">@ViewData["Title"]</h3>
+            </div>
+            <div class="row my-3">
+                <div class="col-md-10">
+                    <div class="col-md-8">
+                        <button id="btn" type="button" class="btn btn-outline-primary justify-content-center">
+                            <i class="bi bi-search"></i>
+                            <span>ค้นหา</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- รายละเอียดการค้นหา -->
+            <form asp-controller="Home" asp-action="Index" method="get" id="form" style="display: inline;">
+                <div class="row mx-0 mb-4 pb-4 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+                    <div class="row m-0 g-3 justify-content-between">
+                        <div class="col-md-4">
+                            <label for="mySelect">กิจกรรมอบรม</label>
+                            <input type="text" class="form-control" name="searchName" for="mySelect" id="Name" placeholder="กรุณากรอกชื่อกิจกรรม">
+                        </div>
+                        <div class="col-md-4 pe-2">
+                            <label for="searchCategory">ชื่อประเภทของกิจกรรมอบรม</label>
+                            <select class="form-control" id="mySelect" name="searchCategory" asp-items="(IEnumerable<SelectListItem>)@ViewData["Categories"]">
+                                <option value="">-- เลือกประเภทกิจกรรม --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mySelect">จังหวัดที่จัดกิจกรรมอบรม</label>
+                            <select class="form-control" id="mySelect" name="searchProvince" asp-items="(IEnumerable<SelectListItem>)@ViewData["Provinces"]">
+                                <option value="">-- เลือกจังหวัด --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row m-0 g-3 ">
+                        <label>ช่วงวันที่จัดกิจกรรมอบรม</label>
+                    </div>
+                    <!---->
+                    <div class="row mx-2 my-0 gy-2 gx-3 justify-content-between">
+                        <div class="col-md-3">
+                            <div class="row">
+                                <div class="col-12">
+                                    <span class="m-0 p-0">วันที่เริ่มต้นกิจกรรม</span>
+                                </div>
+                                <div class="col-12 input-group">
+                                    <input type="date" class="form-control" name="startdate"
+                                           placeholder="กรุณาเลือกวันที่" />
+                                    @* <span class="input-group-text">
+                                        <i class="bi bi-calendar"></i>
+                                    </span> *@
+                                </div>
+                                <div class="col-12">
+                                    <span class="m-0 p-0 text-danger" id="startspan"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="row">
+                                <div class="col-12">
+                                    <span class="m-0 p-0">วันที่สิ้นสุดกิจกรรม</span>
+                                </div>
+                                <div class="col-12 input-group">
+                                    <input type="date" class="form-control custom-date-input" name="enddate"
+                                           placeholder="กรุณาเลือกวันที่" />
+                                    @* <span class="input-group-text">
+                                        <i class="bi bi-calendar"></i>
+                                    </span> *@
+                                </div>
+                                <div class="col-12">
+                                    <span class="m-0 p-0 text-danger" id="endspan"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-12">
+                                    <span class="m-0 p-0">วันที่ลงทะเบียน</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="input-group">
+                                        <input type="date" class="form-control custom-date-input" name="enrolldate"
+                                               placeholder="กรุณาเลือกวันที่" />
+                                        @* <span class="input-group-text">
+                                            <i class="bi bi-calendar"></i>
+                                        </span> *@
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-sm-12">
+                                    <row>
+                                        <button type="button" onclick="submitHandler();" class="btn btn-primary btn-block">Filter</button>
+                                        @* <input type="button" class="btn btn-outline-primary btn-block" onclick="resetHandler()" value="Reset" /> *@
+                                    </row>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!-- ปิดรายละเอียดการค้นหา -->
+            <div class="myCard" style="justify-content:space-between; z-index: -1;">
+                <div class="row">
+                    @if (@Model.Any())
+                    {
+                        @foreach (var item in @Model)
+                        {
+                            {
+                                <div class="card" style="width:23em; margin: 10px;">
+                                    @if (item.Training_picture != null)
+                                    {
+                                        <img src="@("/uploads/training/img/"+item.Training_picture)" class="card-img-top">
+                                    }
+                                    else
+                                    {
+                                        <img src="/uploads/photography.jpg" class="card-img-top">
+                                    }
+                                    <div class="card-body">
+                                        <div class="card-title">
+                                            <h5>
+                                                @item.Name
+                                                @if (item.Cost == 0 || item.Cost == null)
+                                                {
+                                                    <span class="badge badge-success bg-success">ฟรี</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-warning bg-warning text-black">@item.Cost ฿</span>
+                                                }
+                                            </h5>
+                                        </div>
+                                        <div class="card-text">
+                                            <p>@item.Lecturer</p>
+                                        </div>
+
+                                        @using (Html.BeginForm("Detail", "Training", FormMethod.Get))
+                                        {
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="btn btn-primary">
+                                                ดูรายละเอียด
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-sm-12 py-5">
+                            <h5 style="text-align: center">ไม่พบข้อมูล</h5>
+                        </div>
+                    }
+                </div>
+            </div>
+            @{
+                var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+                var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+            }
+
+            <a asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex - 1)"
+               class="btn btn-default @prevDisabled">
+                Previous
+            </a>
+            <a asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex + 1)"
+               class="btn btn-default @nextDisabled">
+                Next
+            </a>
+        </div>
+
+    }
+
+}
+else
+{
+    <!-- Content -->
+    <div class="m-3 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+        <div class="mb-4">
+            <h3 class="">@ViewData["Title"]</h3>
+        </div>
+        <div class="row my-3">
+            <div class="col-md-10">
+                <div class="col-md-8">
+                    <button id="btn" type="button" class="btn btn-outline-primary justify-content-center">
+                        <i class="bi bi-search"></i>
+                        <span>ค้นหา</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- รายละเอียดการค้นหา -->
+        <form asp-controller="Home" asp-action="Index" method="get" id="form" style="display: inline;">
+            <div class="row mx-0 mb-4 pb-4 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+                <div class="row m-0 g-3 justify-content-between">
+                    <div class="col-md-4">
+                        <label for="mySelect">กิจกรรมอบรม</label>
+                        <input type="text" class="form-control" name="searchName" for="mySelect" id="Name" placeholder="กรุณากรอกชื่อกิจกรรม">
+                    </div>
+                    <div class="col-md-4 pe-2">
+                        <label for="searchCategory">ชื่อประเภทของกิจกรรมอบรม</label>
+                        <select class="form-control" id="mySelect" name="searchCategory" asp-items="(IEnumerable<SelectListItem>)@ViewData["Categories"]">
+                            <option value="">-- เลือกประเภทกิจกรรม --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="mySelect">จังหวัดที่จัดกิจกรรมอบรม</label>
+                        <select class="form-control" id="mySelect" name="searchProvince" asp-items="(IEnumerable<SelectListItem>)@ViewData["Provinces"]">
+                            <option value="">-- เลือกจังหวัด --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row m-0 g-3 ">
+                    <label>ช่วงวันที่จัดกิจกรรมอบรม</label>
+                </div>
+                <!---->
+                <div class="row mx-2 my-0 gy-2 gx-3 justify-content-between">
+                    <div class="col-md-3">
+                        <div class="row">
+                            <div class="col-12">
+                                <span class="m-0 p-0">วันที่เริ่มต้นกิจกรรม</span>
+                            </div>
+                            <div class="col-12 input-group">
+                                <input type="date" class="form-control" name="startdate"
+                                       placeholder="กรุณาเลือกวันที่" />
+                                @* <span class="input-group-text">
+                                    <i class="bi bi-calendar"></i>
+                                </span> *@
+                            </div>
+                            <div class="col-12">
+                                <span class="m-0 p-0 text-danger" id="startspan"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="row">
+                            <div class="col-12">
+                                <span class="m-0 p-0">วันที่สิ้นสุดกิจกรรม</span>
+                            </div>
+                            <div class="col-12 input-group">
+                                <input type="date" class="form-control custom-date-input" name="enddate"
+                                placeholder="กรุณาเลือกวันที่" />
+                                @* <span class="input-group-text">
+                                    <i class="bi bi-calendar"></i>
+                                </span> *@
+                            </div>
+                            <div class="col-12">
+                                <span class="m-0 p-0 text-danger" id="endspan"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-12">
+                                <span class="m-0 p-0">วันที่ลงทะเบียน</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12">
+                                <div class="input-group">
+                                    <input type="date" class="form-control custom-date-input" name="enrolldate"
+                                           placeholder="กรุณาเลือกวันที่" />
+                                    @* <span class="input-group-text">
+                                        <i class="bi bi-calendar"></i>
+                                    </span> *@
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12">
+                                <row>
+                                <button type="button" onclick="submitHandler();" class="btn btn-primary btn-block">Filter</button>
+                                    @* <input type="button" class="btn btn-outline-primary btn-block" onclick="resetHandler()" value="Reset" /> *@
+                                </row>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!-- ปิดรายละเอียดการค้นหา -->
+        <div class="myCard" style="justify-content:space-between; z-index: -1;">
+            <div class="row">
+                @if (@Model.Any())
+                {
+                    @foreach (var item in @Model)
+                    {
+                        {
+                            <div class="card" style="width:23em; margin: 10px;">
+                                @if (item.Training_picture != null)
+                                {
+                                    <img src="@("/uploads/training/img/"+item.Training_picture)" class="card-img-top">
+                                }
+                                else
+                                {
+                                    <img src="/uploads/photography.jpg" class="card-img-top">
+                                }
+                                <div class="card-body">
+                                    <div class="card-title">
+                                        <h5>
+                                            @item.Name
+                                            @if (item.Cost == 0 || item.Cost == null)
+                                            {
+                                                <span class="badge badge-success bg-success">ฟรี</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning bg-warning text-black">@item.Cost ฿</span>
+                                            }
+                                        </h5>
+                                    </div>
+                                    <div class="card-text">
+                                        <p>@item.Lecturer</p>
+                                    </div>
+
+                                    @using (Html.BeginForm("Detail", "Training", FormMethod.Get))
+                                    {
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="submit" class="btn btn-primary">
+                                            ดูรายละเอียด
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    <div class="col-sm-12 py-5">
+                        <h5 style="text-align: center">ไม่พบข้อมูล</h5>
+                    </div>
+                }
+            </div>
+        </div>
+        @{
+            var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+            var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+        }
+
+        <a asp-action="Index"
+           asp-route-pageNumber="@(Model.PageIndex - 1)"
+           class="btn btn-default @prevDisabled">
+            Previous
+        </a>
+        <a asp-action="Index"
+           asp-route-pageNumber="@(Model.PageIndex + 1)"
+           class="btn btn-default @nextDisabled">
+            Next
+        </a>
+    </div>
+
+}
+
+<!-- End Content -->
+
+@section Scripts {
+    <!-- Add the flatpickr JavaScript file -->
+
+    <script>
+        const toggleFormBtn = document.getElementById('btn');
+        let stspan = document.getElementById('startspan');
+        let enspan = document.getElementById('endspan');
+        
+        toggleFormBtn.addEventListener('click', () => {
+            const form = document.getElementById('form');
+
+            if (form.style.display === 'none') {
+                // 👇️ this SHOWS the form
+                form.style.display = 'block';
+            } else {
+                // 👇️ this HIdES the form
+                form.style.display = 'none';
+            }
+        });
+
+        function submitHandler() {
+            let start = document.forms["form"]["startdate"].value;
+            let end = document.forms["form"]["enddate"].value;
+            if ((start != "" && end == "") || (start == "" && end != "")) {
+                if (start == "") {
+                    stspan.innerText = '* โปรดใส่วันที่เริ่มจัดกิจกรรม';
+                }
+                else if (end == "") {
+                    enspan.innerText = '* โปรดใส่วันที่สิ้นสุดกิจกรรม';
+                }
+            } else {
+                stspan.innerText = '';
+                enspan.innerText = '';
+                document.getElementById('form').submit();
+                console.log("Test2");
+            }
+        }
+
+        function resetHandler() {
+            // var dateInputs = document.querySelectorAll('input[type="date"]');
+
+            // console.log(dateInputs);
+            // // Set values for each input
+            // dateInputs.forEach(function (input) {
+            //     input.value = ""; // Replace with your desired date
+            // });
+            var form = document.getElementById("form");
+            form.reset();
+            // Reset select elements to their default values
+            var selects = form.getElementsByTagName("select");
+            for (var i = 0; i < selects.length; i++) {
+                selects[i].selectedIndex = 0; // Set to the first option
+            }
+            form.submit();
+        }
+    </script>
+}

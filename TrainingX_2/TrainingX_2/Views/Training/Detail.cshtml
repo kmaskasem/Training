@@ -1,0 +1,191 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using TrainingX_2.Areas.Identity.Data
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+@model TrainingX_2.Models.Training.Training
+
+@{
+}
+<!-- Content -->
+<div class="m-3 p-3 p-md-5 rounded bg-white" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+    <div class="mb-4">
+        <h2>@Model.Name</h2>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-sm-8 d-flex justify-content-center">
+            @if (Model.Training_picture != null)
+            {
+                <img src="@("/uploads/training/img/"+Model.Training_picture)" style=" width: 300px;">
+
+                @*                <img src="@("/uploads/training/img/"+Model.Training_picture)" class="card-img-top" alt="...">
+            *@            }
+            else
+            {
+                <img src="/uploads/photography.jpg" style=" wIdth: 300px;" alt="...">
+            }
+        </div>
+    </div>
+    <div class="row">
+        <h5>ประเภท : </h5>
+        <p>@Model.Category.Name</p>
+    </div>
+    @if (Model.Description != null)
+    {
+        <div class="row">
+            <h5>รายละเอียด : </h5>
+            <p>@Model.Description</p>
+        </div>
+
+    }@if (Model.Lecturer != null)
+    {
+        <div class="row">
+            <h5>จัดโดย : </h5>
+            <p>@Model.Lecturer</p>
+        </div>
+    }@if (Model.Objectives != null)
+    {
+        <div class="row">
+            <h5>จุดประสงค์ : </h5>
+            <p>@Model.Objectives</p>
+        </div>
+    }@if (Model.Schedule_file != null)
+    {
+        <div class="row d-grid gap-2 col-md-3 text-wrap me-auto ">
+            <h5>เอกสารรายละเอียด : </h5>
+            <a class="btn btn-warning ms-3 mb-4" target="_blank" href="@("/uploads/training/file/" + Model.Schedule_file)">ดาวน์โหลดไฟล์</a>
+        </div>
+    }
+
+    <div class="row">
+        <h5>วันที่อบรม : </h5>
+        <p>
+            @Model.Start_train_Date.Value.ToString("dd MMM yyyy"
+            , System.Globalization.CultureInfo.InvariantCulture) -
+            @Model.End_train_Date.Value.ToString("dd MMM yyyy"
+            , System.Globalization.CultureInfo.InvariantCulture)
+        </p>
+    </div>
+    <div class="row">
+        <h5>ระยะเวลา (ชั่วโมง) : </h5>
+        <p>@Model.Hours</p>
+    </div>
+    <div class="row">
+        <h5>วันที่ลงทะเบียน : </h5>
+        <p>
+            @Model.Start_enroll_Date.Value.ToString("dd MMM yyyy HH:mm"
+            , System.Globalization.CultureInfo.InvariantCulture) น. -
+            @Model.End_enroll_Date.Value.ToString("dd MMM yyyy HH:mm"
+            , System.Globalization.CultureInfo.InvariantCulture) น.
+        </p>
+    </div>
+    <div class="row">
+        <h5>จำนวนคน : </h5>
+        <p>@Model.NumberOfParticipants คน</p>
+    </div>
+    <div class="row">
+        <h5>ค่าใช้ลงทะเบียน : </h5>
+        <p>@Model.Cost บาท</p>
+    </div>
+    @if (Model.Venue != "")
+    {
+        <div class="row">
+            <h5>สถานที่ : </h5>
+            <p>@Model.Venue</p>
+        </div>
+    }
+    <div class="row">
+        <h5>โพสต์โดย : </h5>
+        <p>@Model.Owner.FullName</p>
+    </div>
+    <div class="row">
+        @if ((int)ViewData["Enroll_Number"] < Model.NumberOfParticipants)
+        {
+            @if (SignInManager.IsSignedIn(User))
+            {
+                @if (Model.OwnerId != (await UserManager.GetUserAsync(User)).Id)
+                {
+                    @if ((int)ViewData["isEnroll"] == 0)
+                    {
+                        @using (Html.BeginForm("Enroll", "Enrollment", FormMethod.Get))
+                        {
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-primary">
+                                ลงทะเบียนกิจกรรม
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <form>
+                            <button type="button" class="btn btn-success">
+                                ลงทะเบียนแล้ว
+                            </button>
+                        </form>
+                    }
+                }
+                else
+                {
+                    @using (Html.BeginForm("Edit", "Training", FormMethod.Get))
+                    {
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary">
+                            แก้ไข
+                        </button>
+                    }
+                }
+            }
+            else
+            {
+                <p class="text-primary">สมัครสมาชิก เพื่อลงทะเบียน</p>
+                <a class="btn btn-primary" id="register" asp-area="Identity" asp-page="/Account/Register">สมัครสมาชิก</a>
+
+            }
+
+        }
+        else
+        {
+            <div class="row">
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    @if (Model.OwnerId == (await UserManager.GetUserAsync(User)).Id)
+                    {
+                        @using (Html.BeginForm("Edit", "Training", FormMethod.Get))
+                        {
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-primary">
+                                แก้ไข
+                            </button>
+                        }
+                    }
+                }
+                <form>
+                    <button type="button" class="btn btn-danger mt-2">
+                        จำนวนผู้ลงทะเบียนเต็มแล้ว
+                    </button>
+                </form>
+            </div>
+        }
+
+
+    </div>
+    @*<div class="row">
+    <h5>ผู้จัดกิจกรรมอบรม : </h5>
+    <p>@Model.Owner</p>
+    </div>*@
+</div>
+
+@*<div class="content">
+    <div class="item">
+        <h3 class="">@Model.Name</h3>
+    </div>
+    <div class="mb-2">
+        <a href="#" class="btn btn-warning">สมัคร</a>
+    </div>
+
+
+
+
+</div>*@
+<!-- End Content -->
